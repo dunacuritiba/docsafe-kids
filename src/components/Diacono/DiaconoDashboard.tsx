@@ -17,12 +17,15 @@ import {
   UserCheck,
   ShieldCheck,
   ArrowRightLeft,
+  Edit2,
 } from 'lucide-react';
 import type { DocumentRecord, User, UserRole } from '../../types';
 import { REDES_DISPONIVEIS, isUserAdmin } from '../../types';
 import { supabaseGetAllDocumentsForDiacono, supabaseGetAllUsers } from '../../services/supabase';
+import { getStoredUsers } from '../../utils/storage';
 import { useAuth } from '../../context/AuthContext';
 import { DocumentViewModal } from '../Documents/DocumentViewModal';
+import { UserEditByDiaconoModal } from './UserEditByDiaconoModal';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +44,7 @@ export const DiaconoDashboard: React.FC = () => {
   const { user: currentUser, changeUserRole } = useAuth();
   const isAdmin = isUserAdmin(currentUser?.email);
 
-  // Abas do Painel: Documentos vs Gestão de Usuários (se Admin)
+  // Abas do Painel: Documentos vs Gestão de Usuários
   const [activeSubTab, setActiveSubTab] = useState<'DOCUMENTS' | 'USERS'>('DOCUMENTS');
 
   // Modo de visualização para os documentos: Tabela ou Cards
@@ -51,12 +54,19 @@ export const DiaconoDashboard: React.FC = () => {
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
 
-  // Usuários (Gestão do Administrador)
+  // Usuários (Gestão para Diáconos e Admin)
   const [usersList, setUsersList] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [searchUserAdmin, setSearchUserAdmin] = useState('');
+  const [userFilterRede, setUserFilterRede] = useState<string>('TODAS');
+  const [userFilterRole, setUserFilterRole] = useState<string>('TODOS');
+  const [userFilterCert, setUserFilterCert] = useState<string>('TODOS');
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [roleUpdateSuccess, setRoleUpdateSuccess] = useState<string | null>(null);
+
+  // Modal de Edição de Usuário pelo Diácono
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Filtros de Documentos
   const [searchDocUser, setSearchDocUser] = useState('');
@@ -65,7 +75,7 @@ export const DiaconoDashboard: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('TODOS');
   const [selectedValidity, setSelectedValidity] = useState<string>('TODOS');
 
-  // Modal de Visualização
+  // Modal de Visualização de Documento
   const [viewingDoc, setViewingDoc] = useState<DocumentRecord | null>(null);
 
   // Carrega todos os documentos de todos os usuários
@@ -81,15 +91,18 @@ export const DiaconoDashboard: React.FC = () => {
     }
   };
 
-  // Carrega lista de usuários (para Admin)
+  // Carrega lista de usuários para visualização e edição pelos Diáconos
   const fetchAllUsers = async () => {
-    if (!isAdmin) return;
     setIsLoadingUsers(true);
     try {
-      const users = await supabaseGetAllUsers();
+      let users = await supabaseGetAllUsers();
+      if (users.length === 0) {
+        users = getStoredUsers();
+      }
       setUsersList(users);
     } catch (err) {
       console.error('Erro ao carregar usuários:', err);
+      setUsersList(getStoredUsers());
     } finally {
       setIsLoadingUsers(false);
     }
@@ -97,10 +110,8 @@ export const DiaconoDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchAllDocs();
-    if (isAdmin) {
-      fetchAllUsers();
-    }
-  }, [isAdmin]);
+    fetchAllUsers();
+  }, []);
 
   // Ação de alterar papel de usuário pelo Admin
   const handleToggleUserRole = async (targetUser: User) => {
@@ -200,17 +211,40 @@ export const DiaconoDashboard: React.FC = () => {
     });
   }, [documents, searchDocUser, selectedRede, selectedMonth, selectedStatus, selectedValidity]);
 
-  // Filtragem de Usuários no painel de administração
+  // Filtragem de Usuários no painel dos Diáconos
   const filteredUsers = useMemo(() => {
-    if (!searchUserAdmin.trim()) return usersList;
-    const term = searchUserAdmin.toLowerCase();
-    return usersList.filter(
-      u =>
-        u.nome.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term) ||
-        (u.rede && u.rede.toLowerCase().includes(term))
-    );
-  }, [usersList, searchUserAdmin]);
+    return usersList.filter(u => {
+      if (searchUserAdmin.trim()) {
+        const term = searchUserAdmin.toLowerCase();
+        const matchesName = (u.nome || '').toLowerCase().includes(term);
+        const matchesEmail = (u.email || '').toLowerCase().includes(term);
+        const matchesRede = (u.rede || '').toLowerCase().includes(term);
+        if (!matchesName && !matchesEmail && !matchesRede) return false;
+      }
+
+      if (userFilterRede !== 'TODAS' && u.rede !== userFilterRede) {
+        return false;
+      }
+
+      if (userFilterRole !== 'TODOS' && u.role !== userFilterRole) {
+        return false;
+      }
+
+      if (userFilterCert !== 'TODOS') {
+        const userDocs = documents.filter(d => d.userId === u.id);
+        const hasDocs = userDocs.length > 0;
+        const hasValid = userDocs.some(
+          d => d.statusValidacao === 'APROVADO' && d.diasRestantesValidade >= 0
+        );
+
+        if (userFilterCert === 'SEM_CERTIDAO' && hasDocs) return false;
+        if (userFilterCert === 'COM_CERTIDAO_VALIDA' && !hasValid) return false;
+        if (userFilterCert === 'COM_CERTIDAO_EXPIRADA' && (!hasDocs || hasValid)) return false;
+      }
+
+      return true;
+    });
+  }, [usersList, searchUserAdmin, userFilterRede, userFilterRole, userFilterCert, documents]);
 
   const total = documents.length;
   const aprovadas = documents.filter(d => d.statusValidacao === 'APROVADO').length;
@@ -364,32 +398,30 @@ export const DiaconoDashboard: React.FC = () => {
         </div>
       </Card>
 
-      {/* SE FOR ADMIN (luan@secid.pr.gov.br): Seletor de Sub-abas */}
-      {isAdmin && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 bg-muted/60 rounded-2xl w-full sm:w-fit border border-border/50">
-          <Button
-            variant={activeSubTab === 'DOCUMENTS' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveSubTab('DOCUMENTS')}
-            className="text-xs sm:text-sm font-bold gap-2 h-10 sm:h-9 justify-center"
-          >
-            <FileText className="w-4 h-4 text-purple-600" />
-            Documentos & Certidões ({filteredDocs.length})
-          </Button>
-          <Button
-            variant={activeSubTab === 'USERS' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveSubTab('USERS')}
-            className="text-xs sm:text-sm font-bold gap-2 h-10 sm:h-9 justify-center"
-          >
-            <Users className="w-4 h-4 text-amber-600" />
-            Gestão de Papéis (Admin)
-            <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 font-bold ml-1">
-              {totalUsuarios}
-            </Badge>
-          </Button>
-        </div>
-      )}
+      {/* Seletor de Sub-abas (Disponível para todos os Diáconos e Admin) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 bg-muted/60 rounded-2xl w-full sm:w-fit border border-border/50">
+        <Button
+          variant={activeSubTab === 'DOCUMENTS' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveSubTab('DOCUMENTS')}
+          className="text-xs sm:text-sm font-bold gap-2 h-10 sm:h-9 justify-center"
+        >
+          <FileText className="w-4 h-4 text-purple-600" />
+          Certidões & Documentos ({filteredDocs.length})
+        </Button>
+        <Button
+          variant={activeSubTab === 'USERS' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveSubTab('USERS')}
+          className="text-xs sm:text-sm font-bold gap-2 h-10 sm:h-9 justify-center"
+        >
+          <Users className="w-4 h-4 text-emerald-600" />
+          Gestão de Usuários & Membros
+          <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold ml-1">
+            {filteredUsers.length}
+          </Badge>
+        </Button>
+      </div>
 
       {/* SUB-ABA 1: DOCUMENTOS & CERTIDÕES */}
       {activeSubTab === 'DOCUMENTS' && (
@@ -778,43 +810,107 @@ export const DiaconoDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* SUB-ABA 2: GESTÃO DE USUÁRIOS E PAPÉIS (EXCLUSIVO PARA luan@secid.pr.gov.br) */}
-      {isAdmin && activeSubTab === 'USERS' && (
-        <Card className="p-5 sm:p-6 border-border shadow-xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border/60">
+      {/* SUB-ABA 2: GESTÃO DE USUÁRIOS E MEMBROS (Disponível para todos os Diáconos e Admin) */}
+      {activeSubTab === 'USERS' && (
+        <Card className="p-4 sm:p-6 border-border shadow-xs space-y-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-border/60">
             <div>
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-600" />
-                Painel Administrativo: Gestão de Papéis
+              <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-600" />
+                Gestão e Verificação de Usuários & Membros
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                Apenas o administrador <strong className="text-foreground">luan@secid.pr.gov.br</strong> possui permissão para alternar o papel dos membros entre <strong>USUÁRIO</strong> e <strong>DIÁCONO</strong>.
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Visualize os dados cadastrais de cada membro, verifique a conformidade da Certidão de Antecedentes Criminais (validade de 90 dias) e edite informações quando necessário.
               </CardDescription>
+              {!isAdmin && (
+                <p className="text-[11px] sm:text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Nota: Alteração de papéis (Diácono / Usuário) é restrita ao administrador geral (luan@secid.pr.gov.br).
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
-              <Badge variant="secondary" className="px-3 py-1 font-bold">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Badge variant="secondary" className="px-2.5 py-1 font-bold">
+                Total: {filteredUsers.length} de {usersList.length}
+              </Badge>
+              <Badge variant="outline" className="px-2.5 py-1 font-bold bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300">
                 {totalDiaconos} Diáconos
               </Badge>
-              <Badge variant="outline" className="px-3 py-1 font-bold">
-                {totalUsuarios - totalDiaconos} Usuários Comuns
+              <Badge variant="outline" className="px-2.5 py-1 font-bold">
+                {totalUsuarios - totalDiaconos} Usuários
               </Badge>
             </div>
           </div>
 
-          {/* Campo de Busca de Usuário */}
-          <div className="max-w-md">
+          {/* Barra de Filtros de Usuários */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-muted/40 p-3.5 rounded-2xl border border-border/60">
+            {/* Busca textual */}
             <div className="relative">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Buscar usuário por nome, e-mail ou rede..."
+                placeholder="Buscar por nome, e-mail..."
                 value={searchUserAdmin}
                 onChange={e => setSearchUserAdmin(e.target.value)}
-                className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
+                className="pl-9 h-11 sm:h-10 text-xs sm:text-sm bg-background"
               />
             </div>
+
+            {/* Filtro por Rede */}
+            <div>
+              <select
+                aria-label="Filtrar por rede ministerial"
+                value={userFilterRede}
+                onChange={e => setUserFilterRede(e.target.value)}
+                className="w-full h-11 sm:h-10 px-3 rounded-md border border-input bg-background text-xs sm:text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="TODAS">Todas as Redes</option>
+                {REDES_DISPONIVEIS.map(r => (
+                  <option key={r.id} value={r.id}>
+                    Rede {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro por Papel */}
+            <div>
+              <select
+                aria-label="Filtrar por papel"
+                value={userFilterRole}
+                onChange={e => setUserFilterRole(e.target.value)}
+                className="w-full h-11 sm:h-10 px-3 rounded-md border border-input bg-background text-xs sm:text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="TODOS">Todos os Papéis</option>
+                <option value="USUARIO">Apenas Usuários</option>
+                <option value="DIACONO">Apenas Diáconos</option>
+              </select>
+            </div>
+
+            {/* Filtro por Status da Certidão */}
+            <div>
+              <select
+                aria-label="Filtrar por situação da certidão"
+                value={userFilterCert}
+                onChange={e => setUserFilterCert(e.target.value)}
+                className="w-full h-11 sm:h-10 px-3 rounded-md border border-input bg-background text-xs sm:text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="TODOS">Status da Certidão: Todos</option>
+                <option value="COM_CERTIDAO_VALIDA">✅ Com Certidão Válida (≤90d)</option>
+                <option value="COM_CERTIDAO_EXPIRADA">⚠️ Com Certidão Vencida / Divergente</option>
+                <option value="SEM_CERTIDAO">❌ Sem Certidão Cadastrada</option>
+              </select>
+            </div>
           </div>
+
+          {/* Feedback de alteração de papel */}
+          {roleUpdateSuccess && (
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-800 dark:text-emerald-200 text-xs sm:text-sm font-medium flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              {roleUpdateSuccess}
+            </div>
+          )}
 
           {/* Lista de Usuários */}
           {isLoadingUsers ? (
@@ -822,17 +918,31 @@ export const DiaconoDashboard: React.FC = () => {
               <div className="w-8 h-8 border-3 border-muted border-t-primary rounded-full animate-spin mx-auto mb-2"></div>
               <p className="text-xs sm:text-sm font-semibold text-muted-foreground">Carregando usuários cadastrados...</p>
             </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="py-12 text-center bg-muted/20 rounded-2xl border border-dashed border-border/80">
+              <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+              <p className="text-sm font-bold text-foreground">Nenhum membro encontrado</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tente ajustar os filtros de busca, rede ou situação da certidão.
+              </p>
+            </div>
           ) : (
             <>
-              {/* VISÃO EM CARDS PARA MOBILE (Admin) */}
+              {/* VISÃO EM CARDS PARA MOBILE */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 block md:hidden">
                 {filteredUsers.map(u => {
                   const redeMeta = REDES_DISPONIVEIS.find(r => r.id === u.rede);
                   const isSelfAdmin = isUserAdmin(u.email);
                   const isUpdating = updatingUserId === u.id;
+                  const userDocs = documents.filter(d => d.userId === u.id);
+                  const hasValid = userDocs.some(
+                    d => d.statusValidacao === 'APROVADO' && d.diasRestantesValidade >= 0
+                  );
+                  const hasDivergent = userDocs.some(d => d.statusValidacao === 'DIVERGENTE');
+                  const hasExpired = userDocs.some(d => d.diasRestantesValidade < 0);
 
                   return (
-                    <Card key={u.id} className="p-4 shadow-xs space-y-3 border-border">
+                    <Card key={u.id} className="p-4 shadow-xs space-y-3.5 border-border">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 overflow-hidden">
                           <Avatar size="default" className="border border-border">
@@ -863,43 +973,109 @@ export const DiaconoDashboard: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="bg-muted/40 p-2.5 rounded-xl border border-border/60 text-xs space-y-1">
+                      {/* Informações detalhadas do Membro */}
+                      <div className="bg-muted/40 p-2.5 rounded-xl border border-border/60 text-xs space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Data Nascimento</span>
-                          <span className="font-mono text-xs font-semibold text-foreground">
+                          <span className="text-muted-foreground">Data Nascimento</span>
+                          <span className="font-mono font-semibold text-foreground">
                             {u.dataNascimento || <span className="text-amber-500 font-sans">Não cadastrada</span>}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Papel no Sistema</span>
+                          <span className="text-muted-foreground">Papel</span>
                           <Badge
                             variant={u.role === 'DIACONO' ? 'secondary' : 'outline'}
                             className="text-xs font-bold gap-1 py-0.5"
                           >
-                            <UserCheck className="w-3.5 h-3.5" />
+                            <UserCheck className="w-3 h-3" />
                             {u.role === 'DIACONO' ? 'DIÁCONO' : 'USUÁRIO'}
                           </Badge>
                         </div>
+                        <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                          <span className="text-muted-foreground">Certidão (90 dias)</span>
+                          {hasValid ? (
+                            <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold gap-1 py-0.5">
+                              <CheckCircle2 className="w-3 h-3" /> Válida (≤90d)
+                            </Badge>
+                          ) : hasDivergent ? (
+                            <Badge className="bg-rose-600 text-white text-[11px] font-bold gap-1 py-0.5">
+                              <AlertTriangle className="w-3 h-3" /> Divergente
+                            </Badge>
+                          ) : hasExpired ? (
+                            <Badge className="bg-amber-600 text-white text-[11px] font-bold gap-1 py-0.5">
+                              <Calendar className="w-3 h-3" /> Vencida (&gt;90d)
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground text-[11px] gap-1 py-0.5">
+                              <FileText className="w-3 h-3" /> Sem certidão
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
-                      <Button
-                        variant={u.role === 'DIACONO' ? 'outline' : 'default'}
-                        size="sm"
-                        disabled={isUpdating}
-                        onClick={() => handleToggleUserRole(u)}
-                        className={`w-full text-xs font-semibold gap-1.5 h-10 ${
-                          u.role === 'DIACONO'
-                            ? ''
-                            : 'bg-purple-600 hover:bg-purple-700 text-white'
-                        }`}
-                      >
-                        <ArrowRightLeft className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-                        {isUpdating
-                          ? 'Salvando alteração...'
-                          : u.role === 'DIACONO'
-                          ? 'Rebaixar para Usuário Comum'
-                          : 'Promover a Diácono'}
-                      </Button>
+                      {/* Ações do Diácono */}
+                      <div className="space-y-2 pt-1">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => {
+                              setEditingUser(u);
+                              setIsEditModalOpen(true);
+                            }}
+                            className="w-full text-xs font-bold gap-1.5 h-10"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                            Editar
+                          </Button>
+
+                          {userDocs.length > 0 ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSearchDocUser(u.nome || u.email);
+                                setActiveSubTab('DOCUMENTS');
+                              }}
+                              className="w-full text-xs font-semibold gap-1.5 h-10"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              Certidões ({userDocs.length})
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled
+                              className="w-full text-xs text-muted-foreground h-10"
+                            >
+                              Sem certidão
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Ação de Alterar Papel (Admin apenas) */}
+                        {isAdmin && (
+                          <Button
+                            variant={u.role === 'DIACONO' ? 'outline' : 'secondary'}
+                            size="sm"
+                            disabled={isUpdating}
+                            onClick={() => handleToggleUserRole(u)}
+                            className={`w-full text-xs font-semibold gap-1.5 h-9 ${
+                              u.role === 'DIACONO'
+                                ? ''
+                                : 'bg-purple-100 text-purple-900 hover:bg-purple-200 dark:bg-purple-950 dark:text-purple-200'
+                            }`}
+                          >
+                            <ArrowRightLeft className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+                            {isUpdating
+                              ? 'Salvando...'
+                              : u.role === 'DIACONO'
+                              ? 'Rebaixar para Usuário Comum'
+                              : 'Promover a Diácono'}
+                          </Button>
+                        )}
+                      </div>
                     </Card>
                   );
                 })}
@@ -913,8 +1089,9 @@ export const DiaconoDashboard: React.FC = () => {
                       <TableHead className="font-bold">Membro / Usuário</TableHead>
                       <TableHead className="font-bold">Rede</TableHead>
                       <TableHead className="font-bold">Data Nascimento</TableHead>
+                      <TableHead className="font-bold">Certidão (90 dias)</TableHead>
                       <TableHead className="font-bold">Papel Atual</TableHead>
-                      <TableHead className="font-bold text-right">Alterar Papel (Admin)</TableHead>
+                      <TableHead className="font-bold text-right">Ações Diácono</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -922,6 +1099,12 @@ export const DiaconoDashboard: React.FC = () => {
                       const redeMeta = REDES_DISPONIVEIS.find(r => r.id === u.rede);
                       const isSelfAdmin = isUserAdmin(u.email);
                       const isUpdating = updatingUserId === u.id;
+                      const userDocs = documents.filter(d => d.userId === u.id);
+                      const hasValid = userDocs.some(
+                        d => d.statusValidacao === 'APROVADO' && d.diasRestantesValidade >= 0
+                      );
+                      const hasDivergent = userDocs.some(d => d.statusValidacao === 'DIVERGENTE');
+                      const hasExpired = userDocs.some(d => d.diasRestantesValidade < 0);
 
                       return (
                         <TableRow key={u.id} className="hover:bg-muted/40 transition-colors">
@@ -938,7 +1121,7 @@ export const DiaconoDashboard: React.FC = () => {
                                   <span className="font-bold text-foreground text-sm">{u.nome}</span>
                                   {isSelfAdmin && (
                                     <Badge variant="outline" className="text-[10px] font-bold bg-amber-50 text-amber-800 border-amber-300 py-0 px-1.5">
-                                      Admin Principal
+                                      Admin Geral
                                     </Badge>
                                   )}
                                 </div>
@@ -964,6 +1147,26 @@ export const DiaconoDashboard: React.FC = () => {
                           </TableCell>
 
                           <TableCell>
+                            {hasValid ? (
+                              <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold gap-1 py-0.5">
+                                <CheckCircle2 className="w-3 h-3" /> Válida (≤90d)
+                              </Badge>
+                            ) : hasDivergent ? (
+                              <Badge className="bg-rose-600 text-white text-[11px] font-bold gap-1 py-0.5">
+                                <AlertTriangle className="w-3 h-3" /> Divergente
+                              </Badge>
+                            ) : hasExpired ? (
+                              <Badge className="bg-amber-600 text-white text-[11px] font-bold gap-1 py-0.5">
+                                <Calendar className="w-3 h-3" /> Vencida (&gt;90d)
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-[11px] gap-1 py-0.5">
+                                <FileText className="w-3 h-3" /> Sem certidão
+                              </Badge>
+                            )}
+                          </TableCell>
+
+                          <TableCell>
                             <Badge
                               variant={u.role === 'DIACONO' ? 'secondary' : 'outline'}
                               className="text-xs font-bold gap-1 py-0.5"
@@ -974,29 +1177,63 @@ export const DiaconoDashboard: React.FC = () => {
                           </TableCell>
 
                           <TableCell className="text-right">
-                            <Button
-                              variant={u.role === 'DIACONO' ? 'outline' : 'default'}
-                              size="sm"
-                              disabled={isUpdating}
-                              onClick={() => handleToggleUserRole(u)}
-                              className={`text-xs font-semibold gap-1.5 h-9 ${
-                                u.role === 'DIACONO'
-                                  ? ''
-                                  : 'bg-purple-600 hover:bg-purple-700 text-white'
-                              }`}
-                              title={
-                                u.role === 'DIACONO'
-                                  ? 'Rebaixar para Usuário Comum'
-                                  : 'Promover este membro para Diácono'
-                              }
-                            >
-                              <ArrowRightLeft className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-                              {isUpdating
-                                ? 'Salvando...'
-                                : u.role === 'DIACONO'
-                                ? 'Tornar Usuário'
-                                : 'Promover a Diácono'}
-                            </Button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingUser(u);
+                                  setIsEditModalOpen(true);
+                                }}
+                                className="text-xs font-semibold gap-1.5 h-8"
+                                title="Editar dados cadastrais e foto deste membro"
+                              >
+                                <Edit2 className="w-3.5 h-3.5 text-primary" />
+                                Editar
+                              </Button>
+
+                              {userDocs.length > 0 && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSearchDocUser(u.nome || u.email);
+                                    setActiveSubTab('DOCUMENTS');
+                                  }}
+                                  className="text-xs font-semibold gap-1 h-8 text-muted-foreground hover:text-foreground"
+                                  title="Filtrar certidões deste usuário"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Certidões
+                                </Button>
+                              )}
+
+                              {isAdmin && (
+                                <Button
+                                  variant={u.role === 'DIACONO' ? 'outline' : 'secondary'}
+                                  size="sm"
+                                  disabled={isUpdating}
+                                  onClick={() => handleToggleUserRole(u)}
+                                  className={`text-xs font-semibold gap-1 h-8 ${
+                                    u.role === 'DIACONO'
+                                      ? ''
+                                      : 'bg-purple-100 text-purple-900 hover:bg-purple-200 dark:bg-purple-950 dark:text-purple-200'
+                                  }`}
+                                  title={
+                                    u.role === 'DIACONO'
+                                      ? 'Rebaixar para Usuário Comum'
+                                      : 'Promover este membro para Diácono'
+                                  }
+                                >
+                                  <ArrowRightLeft className={`w-3 h-3 ${isUpdating ? 'animate-spin' : ''}`} />
+                                  {isUpdating
+                                    ? '...'
+                                    : u.role === 'DIACONO'
+                                    ? 'Rebaixar'
+                                    : 'Promover'}
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -1014,6 +1251,21 @@ export const DiaconoDashboard: React.FC = () => {
         document={viewingDoc}
         onClose={() => setViewingDoc(null)}
         onEdit={() => {}}
+      />
+
+      {/* Modal de Edição de Usuário pelo Diácono */}
+      <UserEditByDiaconoModal
+        userToEdit={editingUser}
+        userDocuments={documents}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingUser(null);
+        }}
+        onSaved={() => {
+          fetchAllUsers();
+          fetchAllDocs();
+        }}
       />
     </div>
   );

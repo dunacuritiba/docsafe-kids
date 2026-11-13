@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { User, DocumentRecord, LGPDLog, UserRole } from '../types';
+import type { User, DocumentRecord, LGPDLog, UserRole, RedeType } from '../types';
 
 const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL || 'https://ohzqfjpioggsvsczdadg.supabase.co';
@@ -98,6 +98,40 @@ export async function supabaseUpdateUserRole(
   } catch (err: any) {
     console.error('Erro ao atualizar role:', err);
     return { success: false, error: err.message };
+  }
+}
+
+export async function supabaseUpdateUserByDiacono(
+  userId: string,
+  updates: {
+    nome: string;
+    dataNascimento: string;
+    rede: RedeType;
+    fotoUrl?: string;
+    role?: UserRole;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const payload: any = {
+      nome: updates.nome.trim(),
+      data_nascimento: updates.dataNascimento.trim(),
+      rede: updates.rede,
+      foto_url: updates.fotoUrl || null,
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.role) {
+      payload.role = updates.role;
+    }
+
+    const { error } = await supabase.from(USERS_TABLE).update(payload).eq('id', userId);
+    if (error) {
+      console.warn('Erro ao atualizar dados do usuário pelo Diácono no Supabase:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('Falha ao atualizar dados do usuário pelo Diácono:', err);
+    return { success: false, error: err.message || 'Erro de conexão com o Supabase' };
   }
 }
 
