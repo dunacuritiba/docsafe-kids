@@ -15,12 +15,15 @@ import {
   FileText,
   RefreshCw,
   ArrowRightLeft,
+  Download,
+  Printer,
 } from 'lucide-react';
 import type { User, DocumentRecord, UserRole } from '../../types';
 import { REDES_DISPONIVEIS, isUserAdmin } from '../../types';
 import { supabaseGetAllUsers, supabaseGetAllDocumentsForDiacono } from '../../services/supabase';
 import { getStoredUsers } from '../../utils/storage';
 import { useAuth } from '../../context/AuthContext';
+import { downloadDocumentFile, printDocument } from '../../utils/documentExport';
 import { UserEditByDiaconoModal } from './UserEditByDiaconoModal';
 import { DocumentViewModal } from '../Documents/DocumentViewModal';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
@@ -488,6 +491,32 @@ export const UserManagementView: React.FC = () => {
                       )}
                     </div>
 
+                    {userDocs.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadDocumentFile(userDocs[0])}
+                          disabled={!userDocs[0].arquivoUrl}
+                          className="w-full text-xs font-semibold gap-1.5 h-9"
+                          title="Baixar arquivo da certidão deste membro"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Baixar Certidão
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => printDocument(userDocs[0])}
+                          className="w-full text-xs font-semibold gap-1.5 h-9 text-primary"
+                          title="Imprimir certidão deste membro"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          Imprimir Certidão
+                        </Button>
+                      </div>
+                    )}
+
                     {/* Alternar papel (Admin apenas) */}
                     {isAdmin && (
                       <Button
@@ -643,19 +672,46 @@ export const UserManagementView: React.FC = () => {
                           </Button>
 
                           {userDocs.length > 0 && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setViewingDoc(userDocs[0]);
-                                setViewingDocUser(u);
-                              }}
-                              className="text-xs font-semibold gap-1.5 h-8 text-primary"
-                              title="Visualizar certidão deste membro com cruzamento de dados"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              Ver Certidão
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setViewingDoc(userDocs[0]);
+                                  setViewingDocUser(u);
+                                }}
+                                className="text-xs font-semibold gap-1 h-8 text-primary"
+                                title="Visualizar certidão deste membro com cruzamento de dados"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                Ver
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => downloadDocumentFile(userDocs[0])}
+                                disabled={!userDocs[0].arquivoUrl}
+                                className="text-xs font-semibold gap-1 h-8 px-2"
+                                title={
+                                  userDocs[0].arquivoUrl
+                                    ? 'Baixar arquivo da certidão deste membro'
+                                    : 'Sem anexo'
+                                }
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                Baixar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => printDocument(userDocs[0])}
+                                className="text-xs font-semibold gap-1 h-8 px-2 text-primary"
+                                title="Imprimir certidão deste membro"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                                Imprimir
+                              </Button>
+                            </>
                           )}
 
                           {isAdmin && (

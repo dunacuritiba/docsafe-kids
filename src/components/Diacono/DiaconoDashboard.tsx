@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Download,
+  Printer,
   Eye,
   RefreshCw,
   ShieldAlert,
@@ -24,6 +25,7 @@ import { REDES_DISPONIVEIS, isUserAdmin } from '../../types';
 import { supabaseGetAllDocumentsForDiacono, supabaseGetAllUsers } from '../../services/supabase';
 import { getStoredUsers } from '../../utils/storage';
 import { useAuth } from '../../context/AuthContext';
+import { downloadDocumentFile, printDocument } from '../../utils/documentExport';
 import { DocumentViewModal } from '../Documents/DocumentViewModal';
 import { UserEditByDiaconoModal } from './UserEditByDiaconoModal';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
@@ -675,15 +677,38 @@ export const DiaconoDashboard: React.FC = () => {
                           )}
                         </Badge>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setViewingDoc(doc)}
-                          className="text-xs font-semibold gap-1.5 h-9"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Ver Certidão
-                        </Button>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewingDoc(doc)}
+                            className="text-xs font-semibold gap-1 h-9 px-2.5"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            Ver
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadDocumentFile(doc)}
+                            disabled={!doc.arquivoUrl}
+                            className="text-xs font-semibold gap-1 h-9 px-2.5"
+                            title={doc.arquivoUrl ? 'Baixar Certidão' : 'Sem anexo'}
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            Baixar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => printDocument(doc)}
+                            className="text-xs font-semibold gap-1 h-9 px-2.5 text-primary"
+                            title="Imprimir Certidão"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            Imprimir
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   );
@@ -811,15 +836,39 @@ export const DiaconoDashboard: React.FC = () => {
 
                           {/* Ações */}
                           <TableCell className="text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setViewingDoc(doc)}
-                              className="text-xs font-semibold gap-1 h-7"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              Detalhes
-                            </Button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setViewingDoc(doc)}
+                                className="text-xs font-semibold gap-1 h-7 px-2"
+                                title="Visualizar detalhes da certidão"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                Detalhes
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => downloadDocumentFile(doc)}
+                                disabled={!doc.arquivoUrl}
+                                className="text-xs font-semibold gap-1 h-7 px-2"
+                                title={doc.arquivoUrl ? 'Baixar arquivo da certidão' : 'Sem anexo'}
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                Baixar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => printDocument(doc)}
+                                className="text-xs font-semibold gap-1 h-7 px-2 text-primary"
+                                title="Imprimir certidão"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                                Imprimir
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );

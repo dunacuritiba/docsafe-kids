@@ -10,8 +10,11 @@ import {
   AlertTriangle,
   Building,
   UserCheck,
+  Download,
+  Printer,
 } from 'lucide-react';
 import type { DocumentRecord } from '../../types';
+import { downloadDocumentFile, printDocument } from '../../utils/documentExport';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -167,18 +170,43 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         </div>
 
         {/* Footer com botões shadcn */}
-        <div className="pt-4 mt-3 border-t border-border/60 flex items-center justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onView(document)}
-            className="text-xs font-semibold gap-1.5 h-9"
-          >
-            <Eye className="w-4 h-4" />
-            Visualizar
-          </Button>
-
+        <div className="pt-4 mt-3 border-t border-border/60 flex items-center justify-between gap-1.5 flex-wrap">
           <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onView(document)}
+              className="text-xs font-semibold gap-1.5 h-9"
+            >
+              <Eye className="w-4 h-4" />
+              Visualizar
+            </Button>
+
+            {document.arquivoUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => downloadDocumentFile(document)}
+                className="text-xs font-semibold gap-1.5 h-9 text-primary hover:text-primary"
+                title="Baixar arquivo da certidão"
+              >
+                <Download className="w-4 h-4" />
+                Baixar
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => printDocument(document)}
+              className="text-muted-foreground hover:text-foreground h-9 w-9"
+              title="Imprimir certidão"
+            >
+              <Printer className="w-4 h-4" />
+            </Button>
+
             <Button
               variant="ghost"
               size="icon"
@@ -188,6 +216,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
             >
               <Edit2 className="w-4 h-4" />
             </Button>
+
             <Button
               variant="ghost"
               size="icon"

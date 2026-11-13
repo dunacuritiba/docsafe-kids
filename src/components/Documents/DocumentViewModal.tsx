@@ -4,6 +4,7 @@ import {
   FileText,
   Lock,
   Download,
+  Printer,
   Calendar,
   Check,
   Copy,
@@ -24,6 +25,7 @@ import { formatFileSize } from '../../utils/masks';
 import { normalizeString, normalizeDate } from '../../utils/certidaoParser';
 import { getStoredUsers } from '../../utils/storage';
 import { supabaseGetUserByEmail } from '../../services/supabase';
+import { downloadDocumentFile, printDocument } from '../../utils/documentExport';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -94,13 +96,11 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
   };
 
   const downloadFile = () => {
-    if (!document.arquivoUrl) return;
-    const a = window.document.createElement('a');
-    a.href = document.arquivoUrl;
-    a.download = document.nomeArquivo || `certidao_${document.numeroDocumento}.pdf`;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
+    downloadDocumentFile(document);
+  };
+
+  const handlePrint = () => {
+    printDocument(document);
   };
 
   const isExpired = document.diasRestantesValidade < 0;
@@ -420,15 +420,28 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
                     {document.nomeArquivo} • {formatFileSize(document.tamanhoArquivo)}
                   </span>
                 </div>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={downloadFile}
-                  className="gap-2 h-10 sm:h-9 text-xs sm:text-sm font-semibold"
-                >
-                  <Download className="w-4 h-4" />
-                  Baixar Certidão
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={downloadFile}
+                    className="gap-2 h-10 sm:h-9 text-xs sm:text-sm font-semibold flex-1 sm:flex-none"
+                    title="Baixar arquivo da certidão para seu computador/celular"
+                  >
+                    <Download className="w-4 h-4" />
+                    Baixar Certidão
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrint}
+                    className="gap-2 h-10 sm:h-9 text-xs sm:text-sm font-semibold flex-1 sm:flex-none border-primary/30 text-primary hover:bg-primary/10"
+                    title="Imprimir certidão diretamente"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Imprimir
+                  </Button>
+                </div>
               </div>
 
               <div className="p-4 bg-muted/20 flex items-center justify-center max-h-80 overflow-auto">
@@ -442,20 +455,39 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
                   <div className="text-center py-8">
                     <FileText className="w-16 h-16 text-primary mx-auto mb-2 opacity-80" />
                     <p className="text-xs sm:text-sm text-foreground font-medium">Arquivo PDF da Certidão Anexado</p>
-                    <button
-                      type="button"
-                      onClick={downloadFile}
-                      className="mt-3 text-xs sm:text-sm text-primary hover:underline flex items-center gap-1.5 mx-auto cursor-pointer font-semibold"
-                    >
-                      <ExternalLink className="w-4 h-4" /> Baixar ou Abrir PDF
-                    </button>
+                    <div className="flex items-center justify-center gap-3 mt-3">
+                      <button
+                        type="button"
+                        onClick={downloadFile}
+                        className="text-xs sm:text-sm text-primary hover:underline flex items-center gap-1.5 cursor-pointer font-semibold"
+                      >
+                        <ExternalLink className="w-4 h-4" /> Baixar PDF
+                      </button>
+                      <span className="text-muted-foreground/40">•</span>
+                      <button
+                        type="button"
+                        onClick={handlePrint}
+                        className="text-xs sm:text-sm text-primary hover:underline flex items-center gap-1.5 cursor-pointer font-semibold"
+                      >
+                        <Printer className="w-4 h-4" /> Imprimir PDF
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="p-4 bg-muted/20 rounded-xl border border-dashed border-border text-center text-xs text-muted-foreground">
-              Nenhuma cópia anexada a esta certidão.
+            <div className="p-4 bg-muted/20 rounded-xl border border-dashed border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>Nenhuma cópia anexada a esta certidão.</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="gap-1.5 text-xs font-semibold h-8"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Imprimir Ficha de Conferência
+              </Button>
             </div>
           )}
 
@@ -487,23 +519,49 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-muted/30 border-t border-border flex items-center justify-between gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              onClose();
-              onEdit(document);
-            }}
-            className="text-xs sm:text-sm font-semibold h-10 sm:h-9"
-          >
-            Editar Certidão
-          </Button>
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/30 border-t border-border flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onClose();
+                onEdit(document);
+              }}
+              className="text-xs sm:text-sm font-semibold h-10 sm:h-9 flex-1 sm:flex-none"
+            >
+              Editar Certidão
+            </Button>
+            {document.arquivoUrl && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadFile}
+                  className="text-xs sm:text-sm font-semibold h-10 sm:h-9 gap-1.5 flex-1 sm:flex-none"
+                  title="Baixar arquivo da certidão"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Baixar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrint}
+                  className="text-xs sm:text-sm font-semibold h-10 sm:h-9 gap-1.5 flex-1 sm:flex-none text-primary"
+                  title="Imprimir certidão"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Imprimir
+                </Button>
+              </>
+            )}
+          </div>
           <Button
             variant="default"
             size="sm"
             onClick={onClose}
-            className="text-xs sm:text-sm font-semibold h-10 sm:h-9"
+            className="text-xs sm:text-sm font-semibold h-10 sm:h-9 w-full sm:w-auto"
           >
             Fechar
           </Button>
