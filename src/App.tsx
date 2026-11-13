@@ -10,20 +10,24 @@ import { UserProfileEdit } from './components/Profile/UserProfileEdit';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Lock, CheckCircle2, FileText, Camera } from 'lucide-react';
+import { isUserAdmin } from './types';
 
 export const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [authView, setAuthView] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
   const [currentTab, setCurrentTab] = useState<'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'PROFILE'>('DOCUMENTS');
 
-  // Se o usuário for Diácono, abre diretamente a visão diaconal para supervisão
+  const isAdmin = isUserAdmin(user?.email);
+  const isDiacono = user?.role === 'DIACONO' || isAdmin;
+
+  // Se o usuário for Diácono ou Admin, abre diretamente a visão diaconal para supervisão
   useEffect(() => {
-    if (user?.role === 'DIACONO') {
+    if (isDiacono) {
       setCurrentTab('DIACONO');
     } else {
       setCurrentTab('DOCUMENTS');
     }
-  }, [user?.role]);
+  }, [isDiacono]);
 
   if (isLoading) {
     return (
@@ -151,14 +155,14 @@ export const AppContent: React.FC = () => {
       <Navbar currentTab={currentTab} onTabChange={setCurrentTab} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-8">
-        {currentTab === 'DIACONO' && user.role === 'DIACONO' ? (
+        {currentTab === 'DIACONO' ? (
           <DiaconoDashboard />
         ) : currentTab === 'PROFILE' ? (
           <UserProfileEdit />
-        ) : currentTab === 'DOCUMENTS' ? (
-          <DocumentList />
-        ) : (
+        ) : currentTab === 'LGPD' ? (
           <LgpdPrivacyCenter />
+        ) : (
+          <DocumentList />
         )}
       </main>
 

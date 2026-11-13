@@ -299,6 +299,28 @@ export const DiaconoDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  const isAuthorizedDiacono = currentUser?.role === 'DIACONO' || isAdmin;
+
+  if (!isAuthorizedDiacono) {
+    return (
+      <Card className="p-8 text-center max-w-lg mx-auto my-12 border-border shadow-md space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200 dark:bg-amber-950 dark:border-amber-800">
+          <ShieldAlert className="w-7 h-7" />
+        </div>
+        <CardTitle className="text-xl font-bold text-foreground">
+          Acesso Restrito aos Diáconos
+        </CardTitle>
+        <CardDescription className="text-sm text-muted-foreground leading-relaxed">
+          Seu perfil atual está definido como <strong>Usuário Comum</strong>. O Painel do Diácono é restrito para supervisores e diáconos da igreja.
+        </CardDescription>
+        <p className="text-xs text-muted-foreground bg-muted p-3.5 rounded-xl border border-border">
+          Para solicitar a alteração do seu papel para <strong>Diácono</strong>, contate o administrador geral: <br />
+          <strong className="text-foreground">luan@secid.pr.gov.br</strong>
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Feedback de sucesso na alteração de papel */}

@@ -92,9 +92,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const decryptedCpf = await decryptData(baseUser.encryptedCpf, key);
           const decryptedPhone = await decryptData(baseUser.encryptedTelefone, key);
 
+          const isAdmin = isUserAdmin(baseUser.email);
+          const userRole: UserRole = baseUser.role || (isAdmin ? 'DIACONO' : 'USUARIO');
+
           const fullUser: User = {
             ...baseUser,
-            role: baseUser.role || 'USUARIO',
+            role: userRole,
             dataNascimento: baseUser.dataNascimento || storedUser.dataNascimento || '',
             cpf: decryptedCpf,
             telefone: decryptedPhone,
@@ -146,9 +149,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const decryptedCpf = await decryptData(targetUser.encryptedCpf, encryptionKey);
       const decryptedPhone = await decryptData(targetUser.encryptedTelefone, encryptionKey);
 
+      const isAdmin = isUserAdmin(targetUser.email);
       const authenticatedUser: User = {
         ...targetUser,
-        role: targetUser.role || 'USUARIO',
+        role: targetUser.role || (isAdmin ? 'DIACONO' : 'USUARIO'),
         dataNascimento: targetUser.dataNascimento || '',
         cpf: decryptedCpf,
         telefone: decryptedPhone,
@@ -205,12 +209,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const encryptedCpf = await encryptData(data.cpf, encryptionKey);
       const encryptedTelefone = await encryptData(data.telefone, encryptionKey);
 
+      const isAdmin = isUserAdmin(normalizedEmail);
       const newUser: User = {
         id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
         nome: data.nome.trim(),
         email: normalizedEmail,
         dataNascimento: data.dataNascimento.trim(),
-        role: data.role || 'USUARIO', // 'USUARIO' por padrão ou 'DIACONO'
+        role: data.role || (isAdmin ? 'DIACONO' : 'USUARIO'), // Admin é Diácono por padrão
         passwordHash,
         passwordSalt: salt,
         telefone: data.telefone,
