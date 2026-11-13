@@ -1056,13 +1056,12 @@ export const DiaconoDashboard: React.FC = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                setSearchDocUser(u.nome || u.email);
-                                setActiveSubTab('DOCUMENTS');
+                                setViewingDoc(userDocs[0]);
                               }}
                               className="w-full text-xs font-semibold gap-1.5 h-10"
                             >
-                              <Eye className="w-3.5 h-3.5" />
-                              Certidões ({userDocs.length})
+                              <Eye className="w-3.5 h-3.5 text-primary" />
+                              Ver Certidão ({userDocs.length})
                             </Button>
                           ) : (
                             <Button
@@ -1216,17 +1215,16 @@ export const DiaconoDashboard: React.FC = () => {
 
                               {userDocs.length > 0 && (
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => {
-                                    setSearchDocUser(u.nome || u.email);
-                                    setActiveSubTab('DOCUMENTS');
+                                    setViewingDoc(userDocs[0]);
                                   }}
-                                  className="text-xs font-semibold gap-1 h-8 text-muted-foreground hover:text-foreground"
-                                  title="Filtrar certidões deste usuário"
+                                  className="text-xs font-semibold gap-1.5 h-8 text-primary hover:text-primary"
+                                  title="Visualizar certidão e cruzamento cadastral deste membro"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
-                                  Certidões
+                                  Ver Certidão
                                 </Button>
                               )}
 
@@ -1271,6 +1269,15 @@ export const DiaconoDashboard: React.FC = () => {
       {/* Modal de Detalhes da Certidão */}
       <DocumentViewModal
         document={viewingDoc}
+        targetUser={
+          viewingDoc
+            ? usersList.find(
+                u =>
+                  u.id === viewingDoc.userId ||
+                  (viewingDoc.userEmail && u.email.toLowerCase() === viewingDoc.userEmail.toLowerCase())
+              ) || null
+            : null
+        }
         onClose={() => setViewingDoc(null)}
         onEdit={() => {}}
       />

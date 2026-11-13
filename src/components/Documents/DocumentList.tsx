@@ -376,6 +376,7 @@ export const DocumentList: React.FC = () => {
       {/* Modal de Visualização */}
       <DocumentViewModal
         document={selectedDocument}
+        targetUser={user}
         onClose={() => setSelectedDocument(null)}
         onEdit={doc => {
           setSelectedDocument(null);
