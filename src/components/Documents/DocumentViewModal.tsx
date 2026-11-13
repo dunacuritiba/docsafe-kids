@@ -75,16 +75,16 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
   const isCpfMatch = !document.cpfExtraido || (userCpfClean && docCpfClean && userCpfClean === docCpfClean);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden border border-slate-100">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2.5">
             <div className="p-2.5 bg-blue-100 text-blue-700 rounded-xl">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-lg leading-tight">
+              <h3 className="font-bold text-slate-800 text-base sm:text-lg leading-tight">
                 Certidão de Antecedentes Criminais
               </h3>
               <p className="text-xs text-slate-500">
@@ -94,33 +94,33 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 transition-colors"
+            className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-200/50 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5">
           {/* Status Badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Criptografado com AES-GCM 256 bits (LGPD)
+              Criptografado AES-256 (LGPD)
             </span>
 
             {isExpired ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5" /> Expirada há {Math.abs(document.diasRestantesValidade)} dias
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
                 <Calendar className="w-3.5 h-3.5" /> Válida por mais {document.diasRestantesValidade} dias
               </span>
             )}
 
             {!document.constataAntecedentes && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Nada Consta
               </span>
             )}
@@ -137,19 +137,19 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
               {/* Nome */}
               <div className="p-3 rounded-xl bg-white border border-slate-200">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Nome Completo</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase">Nome Completo</span>
                   {isNomeMatch ? (
-                    <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-0.5">
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Confere
                     </span>
                   ) : (
-                    <span className="text-[11px] font-bold text-rose-600 flex items-center gap-0.5">
+                    <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" /> Divergente
                     </span>
                   )}
                 </div>
-                <p className="text-slate-500">Usuário: <strong className="text-slate-800">{user?.nome}</strong></p>
-                <p className="text-slate-500">
+                <p className="text-xs text-slate-600">Usuário: <strong className="text-slate-800">{user?.nome}</strong></p>
+                <p className="text-xs text-slate-600 mt-0.5">
                   Certidão: <strong className={isNomeMatch ? 'text-emerald-700' : 'text-rose-700'}>
                     {document.nomeExtraido || 'Não identificado'}
                   </strong>
@@ -159,21 +159,21 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
               {/* Data de Nascimento */}
               <div className="p-3 rounded-xl bg-white border border-slate-200">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Data de Nascimento</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase">Data de Nascimento</span>
                   {isNascMatch ? (
-                    <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-0.5">
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Confere
                     </span>
                   ) : (
-                    <span className="text-[11px] font-bold text-rose-600 flex items-center gap-0.5">
+                    <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" /> Divergente
                     </span>
                   )}
                 </div>
-                <p className="text-slate-500">
+                <p className="text-xs text-slate-600">
                   Usuário: <strong className="text-slate-800">{user ? normalizeDate(user.dataNascimento) : ''}</strong>
                 </p>
-                <p className="text-slate-500">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Certidão: <strong className={isNascMatch ? 'text-emerald-700' : 'text-rose-700'}>
                     {document.dataNascimentoExtraida || 'Não identificada'}
                   </strong>
@@ -183,17 +183,17 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
 
             {/* CPF */}
             {document.cpfExtraido && (
-              <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase block">CPF Informado</span>
-                  <span className="text-slate-800 font-mono font-semibold">{document.cpfExtraido}</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase block">CPF Informado</span>
+                  <span className="text-slate-800 font-mono font-semibold text-sm">{document.cpfExtraido}</span>
                 </div>
                 {isCpfMatch ? (
-                  <span className="text-emerald-600 text-[11px] font-bold flex items-center gap-1">
+                  <span className="text-emerald-600 text-xs font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" /> CPF Idêntico ao do Usuário
                   </span>
                 ) : (
-                  <span className="text-rose-600 text-[11px] font-bold flex items-center gap-1">
+                  <span className="text-rose-600 text-xs font-bold flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" /> CPF Divergente do Titular
                   </span>
                 )}
@@ -204,10 +204,10 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
           {/* Número da Certidão com Opção Revelar/Copiar */}
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
                 Número de Registro da Certidão
               </span>
-              <p className="text-lg font-mono font-bold text-slate-800 mt-0.5">
+              <p className="text-base sm:text-lg font-mono font-bold text-slate-800 mt-0.5">
                 {showNumber ? document.numeroDocumento : '••••••••••••••••'}
               </p>
             </div>
@@ -216,17 +216,17 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
               <button
                 type="button"
                 onClick={() => setShowNumber(!showNumber)}
-                className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                className="px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer h-10 sm:h-9"
               >
-                {showNumber ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {showNumber ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 {showNumber ? 'Ocultar' : 'Revelar'}
               </button>
               <button
                 type="button"
                 onClick={handleCopy}
-                className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                className="px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer h-10 sm:h-9"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Copiado!' : 'Copiar'}
               </button>
             </div>
@@ -256,21 +256,21 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
           {/* Anexo / Documento Descriptografado */}
           {document.arquivoUrl ? (
             <div className="border border-slate-200 rounded-2xl overflow-hidden">
-              <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800 block">
                     Cópia Descriptografada da Certidão
                   </span>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-xs text-slate-500">
                     {document.nomeArquivo} • {formatFileSize(document.tamanhoArquivo)}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={downloadFile}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition-all cursor-pointer"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer h-10 sm:h-9"
                 >
-                  <Download className="w-3.5 h-3.5" />
+                  <Download className="w-4 h-4" />
                   Baixar Certidão
                 </button>
               </div>
@@ -280,17 +280,17 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
                   <img
                     src={document.arquivoUrl}
                     alt={document.titulo}
-                    className="max-h-72 rounded-lg object-contain shadow-sm border border-slate-300"
+                    className="max-h-72 rounded-lg object-contain shadow-xs border border-slate-300"
                   />
                 ) : (
                   <div className="text-center py-8">
                     <FileText className="w-16 h-16 text-blue-500 mx-auto mb-2" />
-                    <p className="text-xs text-slate-600 font-medium">Arquivo PDF da Certidão Anexado</p>
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">Arquivo PDF da Certidão Anexado</p>
                     <button
                       onClick={downloadFile}
-                      className="mt-3 text-xs text-blue-600 hover:underline flex items-center gap-1 mx-auto cursor-pointer"
+                      className="mt-3 text-xs sm:text-sm text-blue-600 hover:underline flex items-center gap-1.5 mx-auto cursor-pointer font-semibold"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" /> Baixar ou Abrir PDF
+                      <ExternalLink className="w-4 h-4" /> Baixar ou Abrir PDF
                     </button>
                   </div>
                 )}
@@ -313,11 +313,11 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
                 <Lock className="w-3.5 h-3.5 text-blue-600" />
                 Auditoria Técnica: Visualizar Carga Criptografada AES-GCM (LGPD)
               </span>
-              <span className="text-[11px] text-blue-600">{showRawEncrypted ? 'Ocultar' : 'Exibir'}</span>
+              <span className="text-xs text-blue-600 font-bold">{showRawEncrypted ? 'Ocultar' : 'Exibir'}</span>
             </button>
 
             {showRawEncrypted && (
-              <div className="mt-3 p-3 bg-slate-900 rounded-lg text-slate-300 font-mono text-[10px] break-all space-y-2">
+              <div className="mt-3 p-3 bg-slate-900 rounded-lg text-slate-300 font-mono text-xs break-all space-y-2">
                 <div>
                   <span className="text-emerald-400 block font-semibold mb-0.5">
                     // Ciphertext do Número da Certidão (IV:Payload Base64):
@@ -330,21 +330,21 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => {
               onClose();
               onEdit(document);
             }}
-            className="px-4 py-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs sm:text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer h-10 sm:h-9"
           >
             Editar Certidão
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer h-10 sm:h-9"
           >
             Fechar
           </button>

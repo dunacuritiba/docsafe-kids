@@ -11,16 +11,16 @@ export const LgpdConsentModal: React.FC<LgpdConsentModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-100">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl">
-              <ShieldCheck className="w-6 h-6" />
+            <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-lg">Termo de Consentimento & LGPD</h3>
+              <h3 className="font-bold text-slate-800 text-base sm:text-lg">Termo de Consentimento & LGPD</h3>
               <p className="text-xs text-slate-500">Conformidade com a Lei Federal nº 13.709/2018</p>
             </div>
           </div>

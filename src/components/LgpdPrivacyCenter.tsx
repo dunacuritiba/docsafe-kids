@@ -53,18 +53,18 @@ export const LgpdPrivacyCenter: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Banner de Conformidade */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl p-6 sm:p-8 shadow-lg">
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl p-5 sm:p-8 shadow-lg">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md">
-              <ShieldCheck className="w-8 h-8 text-emerald-200" />
+            <div className="p-2.5 sm:p-3 bg-white/10 rounded-2xl backdrop-blur-md">
+              <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-200" />
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                 Central de Privacidade & LGPD
               </h2>
               <p className="text-xs sm:text-sm text-emerald-100 mt-0.5">
-                Em conformidade rigorosa com a Lei Federal Brasileira nº 13.709/2018.
+                Em conformidade com a Lei Federal Brasileira nº 13.709/2018.
               </p>
             </div>
           </div>
@@ -75,8 +75,8 @@ export const LgpdPrivacyCenter: React.FC = () => {
       </div>
 
       {/* Grid de Informações de Segurança */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="p-2 bg-blue-50 text-blue-600 rounded-xl w-fit mb-3">
             <Lock className="w-5 h-5" />
           </div>
@@ -84,12 +84,12 @@ export const LgpdPrivacyCenter: React.FC = () => {
             Algoritmo Criptográfico
           </h4>
           <p className="text-sm font-semibold text-slate-700">AES-GCM (256 bits)</p>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Chave simétrica derivada através de PBKDF2 com 100.000 iterações de SHA-256.
           </p>
         </div>
 
-        <div className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl w-fit mb-3">
             <Key className="w-5 h-5" />
           </div>
@@ -97,15 +97,15 @@ export const LgpdPrivacyCenter: React.FC = () => {
             Isolamento de Chaves
           </h4>
           <p className="text-sm font-semibold text-slate-700">Chave Exclusiva por Titular</p>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Nenhum dado é salvo em texto claro. Salt exclusivo:{' '}
-            <code className="font-mono text-[10px] text-emerald-600">
+            <code className="font-mono text-xs text-emerald-600 font-bold">
               {user.passwordSalt.slice(0, 8)}...
             </code>
           </p>
         </div>
 
-        <div className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="p-2 bg-purple-50 text-purple-600 rounded-xl w-fit mb-3">
             <Database className="w-5 h-5" />
           </div>
@@ -113,7 +113,7 @@ export const LgpdPrivacyCenter: React.FC = () => {
             Consentimento e Base Legal
           </h4>
           <p className="text-sm font-semibold text-slate-700">Art. 7º, Inciso I da LGPD</p>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Consentimento manifestado em {new Date(user.lgpdConsentDate).toLocaleDateString('pt-BR')}.
           </p>
         </div>
@@ -133,7 +133,7 @@ export const LgpdPrivacyCenter: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowEncryptedRaw(!showEncryptedRaw)}
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer h-9"
           >
             {showEncryptedRaw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             {showEncryptedRaw ? 'Ocultar Criptograma' : 'Auditar Criptograma'}
@@ -143,10 +143,10 @@ export const LgpdPrivacyCenter: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           {/* Dados Decifrados em Memória */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-            <span className="font-bold block uppercase tracking-wider text-[11px] text-blue-700">
+            <span className="font-bold block uppercase tracking-wider text-xs text-blue-700">
               1. Em Memória (Decifrado na Sessão do Titular)
             </span>
-            <div className="space-y-1.5 text-slate-600">
+            <div className="space-y-1.5 text-xs text-slate-700">
               <p>
                 <strong>Nome:</strong> {user.nome}
               </p>
@@ -165,7 +165,7 @@ export const LgpdPrivacyCenter: React.FC = () => {
               <p>
                 <strong>Rede:</strong>{' '}
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${redeMeta?.bg} ${redeMeta?.color}`}
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${redeMeta?.bg} ${redeMeta?.color}`}
                 >
                   {redeMeta?.label}
                 </span>
@@ -174,8 +174,8 @@ export const LgpdPrivacyCenter: React.FC = () => {
           </div>
 
           {/* Dados Criptografados no Banco */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-mono text-[11px] space-y-2">
-            <span className="font-bold text-emerald-400 block uppercase tracking-wider text-[11px]">
+          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs space-y-2">
+            <span className="font-bold text-emerald-400 block uppercase tracking-wider text-xs">
               2. No Armazenamento Seguro (Cifrado com AES-256)
             </span>
             {showEncryptedRaw ? (
@@ -196,7 +196,7 @@ export const LgpdPrivacyCenter: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <p className="text-slate-400 italic text-[11px] pt-3">
+              <p className="text-slate-400 italic text-xs pt-3">
                 Clique no botão "Auditar Criptograma" acima para inspecionar os hashes e payloads protegidos.
               </p>
             )}
@@ -205,7 +205,7 @@ export const LgpdPrivacyCenter: React.FC = () => {
       </div>
 
       {/* Direitos do Titular (Artigo 18 da LGPD) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-4">
         <h3 className="font-bold text-slate-800 text-base">
           Ações e Direitos do Titular (Art. 18 da LGPD)
         </h3>
@@ -226,13 +226,13 @@ export const LgpdPrivacyCenter: React.FC = () => {
               <button
                 type="button"
                 onClick={handleExport}
-                className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                className="w-full py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer h-10 sm:h-9"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4" />
                 Exportar Meus Dados (JSON)
               </button>
               {exportSuccess && (
-                <p className="text-[11px] text-emerald-600 font-medium mt-1.5 text-center flex items-center justify-center gap-1">
+                <p className="text-xs text-emerald-600 font-medium mt-1.5 text-center flex items-center justify-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Arquivo JSON exportado com sucesso!
                 </p>
               )}
@@ -253,9 +253,9 @@ export const LgpdPrivacyCenter: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+              className="w-full py-2.5 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer h-10 sm:h-9"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
               Solicitar Exclusão Total
             </button>
           </div>

@@ -143,22 +143,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
   const selectedRedeMeta = REDES_DISPONIVEIS.find(r => r.id === rede);
 
   return (
-    <Card className="p-6 sm:p-8 w-full max-w-xl mx-auto border-border shadow-xl">
+    <Card className="p-4 sm:p-8 w-full max-w-xl mx-auto border-border shadow-xl">
       {/* Cabeçalho */}
       <CardHeader className="text-center p-0 mb-6">
         <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-2xl mx-auto mb-3 shadow-xs">
           <ShieldCheck className="w-6 h-6" />
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">Criar Conta Segura</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">Criar Conta Segura</CardTitle>
         <CardDescription className="text-xs sm:text-sm mt-1">
           Seus dados e documentos protegidos com criptografia de ponta a ponta (LGPD).
         </CardDescription>
         <Button
           type="button"
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={fillSampleData}
-          className="mt-2.5 mx-auto text-[11px] font-medium"
+          className="mt-3 mx-auto text-xs font-semibold h-8"
         >
           ✨ Preencher Exemplo de Teste Rápido
         </Button>
@@ -174,7 +174,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
       <CardContent className="p-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Seção Foto de Perfil / Documento */}
-          <div className="p-4 bg-muted/40 rounded-xl border border-dashed border-border flex flex-col sm:flex-row items-center gap-4">
+          <div className="p-4 bg-muted/40 rounded-2xl border border-dashed border-border flex flex-col sm:flex-row items-center gap-4">
             <div className="relative group">
               <div className="w-20 h-20 rounded-2xl bg-muted border-2 border-background shadow-md overflow-hidden flex items-center justify-center">
                 {fotoUrl ? (
@@ -198,8 +198,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             </div>
 
             <div className="flex-1 text-center sm:text-left">
-              <p className="text-xs font-semibold text-foreground">Foto de Identificação</p>
-              <p className="text-[11px] text-muted-foreground mb-2.5">
+              <p className="text-sm font-semibold text-foreground">Foto de Identificação</p>
+              <p className="text-xs text-muted-foreground mb-3">
                 Tire direto da câmera ou envie um arquivo de foto do seu aparelho.
               </p>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -208,9 +208,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   variant="outline"
                   size="sm"
                   onClick={() => setIsCameraOpen(true)}
-                  className="text-xs gap-1.5 h-8"
+                  className="text-xs gap-1.5 h-9"
                 >
-                  <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+                  <Camera className="w-4 h-4 text-muted-foreground" />
                   Abrir Câmera
                 </Button>
 
@@ -218,10 +218,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   asChild
                   variant="outline"
                   size="sm"
-                  className="text-xs gap-1.5 h-8 cursor-pointer"
+                  className="text-xs gap-1.5 h-9 cursor-pointer"
                 >
                   <label>
-                    <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Upload className="w-4 h-4 text-muted-foreground" />
                     Upload Foto
                     <input
                       type="file"
@@ -237,7 +237,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
 
           {/* Nome Completo */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">
+            <Label className="text-xs sm:text-sm font-semibold">
               Nome Completo <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
@@ -248,16 +248,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                 placeholder="Ex: Maria da Silva"
                 value={nome}
                 onChange={e => setNome(e.target.value)}
-                className="pl-9 h-10"
+                className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
           </div>
 
           {/* Linha: E-mail e Data de Nascimento */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Email */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 E-mail <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -268,14 +268,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   placeholder="seu.email@exemplo.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="pl-9 h-10"
+                  className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
             </div>
 
             {/* Data de Nascimento */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 Data de Nascimento <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -285,20 +285,20 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   required
                   value={dataNascimento}
                   onChange={e => setDataNascimento(e.target.value)}
-                  className="pl-9 h-10 font-sans"
+                  className="pl-9 h-11 sm:h-10 text-base sm:text-sm font-sans"
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Necessária para validação cruzada com a certidão.
               </p>
             </div>
           </div>
 
           {/* Linha: Celular e CPF */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Telefone com máscara brasileira */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 Celular (BR) <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -310,10 +310,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   placeholder="(00) 00000-0000"
                   value={telefone}
                   onChange={handlePhoneChange}
-                  className="pl-9 h-10"
+                  className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Protegido por Criptografia (LGPD)
               </p>
@@ -322,13 +322,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             {/* CPF com validação */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">
+                <Label className="text-xs sm:text-sm font-semibold">
                   CPF <span className="text-destructive">*</span>
                 </Label>
                 {isCpfValid !== null && (
                   <Badge
                     variant={isCpfValid ? 'default' : 'destructive'}
-                    className={`text-[10px] py-0 px-1.5 ${isCpfValid ? 'bg-emerald-600 text-white' : ''}`}
+                    className={`text-xs py-0 px-2 font-bold ${isCpfValid ? 'bg-emerald-600 text-white' : ''}`}
                   >
                     {isCpfValid ? 'CPF Válido' : 'CPF Inválido'}
                   </Badge>
@@ -343,10 +343,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   placeholder="000.000.000-00"
                   value={cpf}
                   onChange={handleCpfChange}
-                  className="pl-9 h-10"
+                  className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Protegido por Criptografia (LGPD)
               </p>
@@ -356,12 +356,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
           {/* Campo Select: REDE que a pessoa pertence */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 Rede de Vinculação <span className="text-destructive">*</span>
               </Label>
               {selectedRedeMeta && (
                 <span
-                  className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${selectedRedeMeta.bg} ${selectedRedeMeta.color} ${selectedRedeMeta.border}`}
+                  className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${selectedRedeMeta.bg} ${selectedRedeMeta.color} ${selectedRedeMeta.border}`}
                 >
                   {selectedRedeMeta.label}
                 </span>
@@ -372,7 +372,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               <select
                 value={rede}
                 onChange={e => setRede(e.target.value as RedeType)}
-                className="w-full pl-9 pr-8 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground appearance-none font-medium cursor-pointer h-10"
+                className="w-full pl-9 pr-8 py-2 bg-background border border-input rounded-lg text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground appearance-none font-medium cursor-pointer h-11 sm:h-10"
               >
                 {REDES_DISPONIVEIS.map(item => (
                   <option key={item.id} value={item.id} className="text-foreground py-1">
@@ -387,9 +387,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
           </div>
 
           {/* Linha: Senha e Confirmação */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 Senha de Acesso <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -401,22 +401,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   placeholder="Mínimo 6 dígitos"
                   value={senha}
                   onChange={e => setSenha(e.target.value)}
-                  className="pl-9 pr-9 h-10"
+                  className="pl-9 pr-10 h-11 sm:h-10 text-base sm:text-sm"
                 />
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-xs"
+                  size="icon-sm"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 Confirmar Senha <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -427,7 +427,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                   placeholder="Repita sua senha"
                   value={confirmarSenha}
                   onChange={e => setConfirmarSenha(e.target.value)}
-                  className="pl-9 h-10"
+                  className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
             </div>
@@ -435,21 +435,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
 
           {/* Checkbox Termo de Consentimento LGPD */}
           <div className="pt-2">
-            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+            <label className="flex items-start gap-3 cursor-pointer select-none">
               <input
                 type="checkbox"
                 required
                 checked={lgpdConsent}
                 onChange={e => setLgpdConsent(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-input text-primary focus:ring-ring"
+                className="mt-1 w-4 h-4 rounded border-input text-primary focus:ring-ring shrink-0"
               />
-              <span className="text-xs text-muted-foreground leading-snug">
+              <span className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Concordo com o tratamento dos meus dados pessoais e autorizo a proteção criptográfica dos meus documentos conforme a{' '}
                 <Button
                   type="button"
                   variant="link"
                   onClick={() => setIsLgpdModalOpen(true)}
-                  className="p-0 h-auto font-semibold text-xs text-primary underline inline"
+                  className="p-0 h-auto font-semibold text-xs sm:text-sm text-primary underline inline"
                 >
                   Lei Geral de Proteção de Dados (LGPD)
                 </Button>
@@ -464,7 +464,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               type="submit"
               disabled={isLoading}
               size="lg"
-              className="w-full font-semibold text-sm gap-2"
+              className="w-full font-semibold text-sm sm:text-base gap-2 h-11 sm:h-10"
             >
               {isLoading ? (
                 <span className="inline-flex items-center gap-2">
@@ -483,12 +483,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
 
         {/* Alternar para Login */}
         <div className="mt-6 pt-5 border-t border-border/60 text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Já possui cadastro no sistema?{' '}
             <Button
               variant="link"
               onClick={onSwitchToLogin}
-              className="p-0 h-auto font-semibold text-xs text-primary"
+              className="p-0 h-auto font-semibold text-xs sm:text-sm text-primary"
             >
               Acessar com E-mail e Senha
             </Button>

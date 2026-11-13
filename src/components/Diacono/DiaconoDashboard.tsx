@@ -335,29 +335,29 @@ export const DiaconoDashboard: React.FC = () => {
         </div>
 
         {/* Resumo Estatístico Claro */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-border/60 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5 pt-5 border-t border-border/60">
           <div className="p-3 bg-muted/40 rounded-2xl border border-border/60">
-            <span className="text-muted-foreground block text-[11px] font-medium">Total Registradas</span>
+            <span className="text-muted-foreground block text-xs font-medium">Total Registradas</span>
             <span className="text-xl sm:text-2xl font-black text-foreground mt-0.5 block">{total}</span>
           </div>
 
           <div className="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50">
-            <span className="text-emerald-700 dark:text-emerald-400 block text-[11px] font-medium flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Aprovadas (Match)
+            <span className="text-emerald-700 dark:text-emerald-400 block text-xs font-medium flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Aprovadas
             </span>
             <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 block">{aprovadas}</span>
           </div>
 
           <div className="p-3 bg-rose-50/70 rounded-2xl border border-rose-100 dark:bg-rose-950/20 dark:border-rose-900/50">
-            <span className="text-rose-700 dark:text-rose-400 block text-[11px] font-medium flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3 text-rose-600 dark:text-rose-400" /> Divergentes
+            <span className="text-rose-700 dark:text-rose-400 block text-xs font-medium flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" /> Divergentes
             </span>
             <span className="text-xl sm:text-2xl font-black text-rose-700 dark:text-rose-400 mt-0.5 block">{divergentes}</span>
           </div>
 
           <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/50">
-            <span className="text-amber-700 dark:text-amber-400 block text-[11px] font-medium flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-amber-600 dark:text-amber-400" /> Vencidas (&gt;90d)
+            <span className="text-amber-700 dark:text-amber-400 block text-xs font-medium flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Vencidas (&gt;90d)
             </span>
             <span className="text-xl sm:text-2xl font-black text-amber-700 dark:text-amber-400 mt-0.5 block">{expiradas}</span>
           </div>
@@ -366,12 +366,12 @@ export const DiaconoDashboard: React.FC = () => {
 
       {/* SE FOR ADMIN (luan@secid.pr.gov.br): Seletor de Sub-abas */}
       {isAdmin && (
-        <div className="flex items-center gap-2 p-1 bg-muted/60 rounded-2xl w-fit border border-border/50">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 bg-muted/60 rounded-2xl w-full sm:w-fit border border-border/50">
           <Button
             variant={activeSubTab === 'DOCUMENTS' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveSubTab('DOCUMENTS')}
-            className="text-xs font-bold gap-2"
+            className="text-xs sm:text-sm font-bold gap-2 h-10 sm:h-9 justify-center"
           >
             <FileText className="w-4 h-4 text-purple-600" />
             Documentos & Certidões ({filteredDocs.length})
@@ -380,11 +380,11 @@ export const DiaconoDashboard: React.FC = () => {
             variant={activeSubTab === 'USERS' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveSubTab('USERS')}
-            className="text-xs font-bold gap-2"
+            className="text-xs sm:text-sm font-bold gap-2 h-10 sm:h-9 justify-center"
           >
             <Users className="w-4 h-4 text-amber-600" />
-            Gestão de Papéis de Usuários (Admin)
-            <Badge variant="secondary" className="text-[10px] bg-amber-100 text-amber-800 font-bold ml-1">
+            Gestão de Papéis (Admin)
+            <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 font-bold ml-1">
               {totalUsuarios}
             </Badge>
           </Button>
@@ -397,12 +397,12 @@ export const DiaconoDashboard: React.FC = () => {
           {/* Barra de Filtros Multifatoriais */}
           <Card className="p-4 sm:p-5 border-border shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
-              <span className="text-xs font-bold text-foreground flex items-center gap-2">
+              <span className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
                 Filtros Avançados de Documentos
               </span>
               <div className="flex items-center gap-3">
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Exibindo <strong>{filteredDocs.length}</strong> de {total}
                 </span>
 
@@ -431,30 +431,30 @@ export const DiaconoDashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
               {/* 1. Busca por Usuário / Titular */}
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   Buscar Usuário / Titular
                 </label>
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <Input
                     type="text"
                     placeholder="Nome, e-mail, certidão..."
                     value={searchDocUser}
                     onChange={e => setSearchDocUser(e.target.value)}
-                    className="pl-9 h-8 text-xs"
+                    className="pl-9 h-11 sm:h-9 text-base sm:text-xs"
                   />
                 </div>
               </div>
 
               {/* 2. Filtro por Rede */}
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   Filtrar por Rede
                 </label>
                 <select
                   value={selectedRede}
                   onChange={e => setSelectedRede(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-background border border-input rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-8"
+                  className="w-full px-3 py-1.5 bg-background border border-input rounded-lg text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-11 sm:h-9"
                 >
                   <option value="TODAS">Todas as Redes</option>
                   {REDES_DISPONIVEIS.map(r => (
@@ -467,15 +467,15 @@ export const DiaconoDashboard: React.FC = () => {
 
               {/* 3. Filtro por Mês */}
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   Filtrar por Mês
                 </label>
                 <div className="relative">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Calendar className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <select
                     value={selectedMonth}
                     onChange={e => setSelectedMonth(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 bg-background border border-input rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-8"
+                    className="w-full pl-9 pr-3 py-1.5 bg-background border border-input rounded-lg text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-11 sm:h-9"
                   >
                     <option value="TODOS">Todos os Meses</option>
                     {availableMonths.map(m => (
@@ -489,13 +489,13 @@ export const DiaconoDashboard: React.FC = () => {
 
               {/* 4. Filtro por Validação Cruzada */}
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   Validação dos Dados
                 </label>
                 <select
                   value={selectedStatus}
                   onChange={e => setSelectedStatus(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-background border border-input rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-8"
+                  className="w-full px-3 py-1.5 bg-background border border-input rounded-lg text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-11 sm:h-9"
                 >
                   <option value="TODOS">Todos os Status</option>
                   <option value="APROVADO">Aprovadas (Match 100%)</option>
@@ -506,13 +506,13 @@ export const DiaconoDashboard: React.FC = () => {
 
               {/* 5. Filtro por Validade de 90 dias */}
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   Prazo de 90 Dias
                 </label>
                 <select
                   value={selectedValidity}
                   onChange={e => setSelectedValidity(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-background border border-input rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-8"
+                  className="w-full px-3 py-1.5 bg-background border border-input rounded-lg text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-ring text-foreground cursor-pointer h-11 sm:h-9"
                 >
                   <option value="TODOS">Todos os Prazos</option>
                   <option value="VALIDOS">Dentro da Validade</option>
@@ -553,56 +553,56 @@ export const DiaconoDashboard: React.FC = () => {
                   return (
                     <Card
                       key={doc.id}
-                      className="p-4 shadow-xs space-y-3 hover:border-primary/40 transition-all flex flex-col justify-between"
+                      className="p-4 sm:p-5 shadow-xs space-y-3 hover:border-primary/40 transition-all flex flex-col justify-between"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5 overflow-hidden">
-                          <Avatar size="sm" className="border border-border">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <Avatar size="default" className="border border-border">
                             {doc.userFotoUrl && <AvatarImage src={doc.userFotoUrl} alt={doc.userNome} />}
                             <AvatarFallback className="text-xs font-bold bg-muted text-muted-foreground">
                               {(doc.userNome || 'U').charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="truncate">
-                            <p className="font-bold text-foreground text-xs truncate">
+                            <p className="font-bold text-foreground text-sm truncate">
                               {doc.userNome || doc.nomeExtraido || 'Sem Nome'}
                             </p>
-                            <p className="text-[10px] text-muted-foreground truncate">{doc.userEmail || '-'}</p>
+                            <p className="text-xs text-muted-foreground truncate">{doc.userEmail || '-'}</p>
                           </div>
                         </div>
 
                         {redeMeta && (
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex-shrink-0 ${redeMeta.bg} ${redeMeta.color} ${redeMeta.border}`}
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border flex-shrink-0 ${redeMeta.bg} ${redeMeta.color} ${redeMeta.border}`}
                           >
                             {redeMeta.label}
                           </span>
                         )}
                       </div>
 
-                      <div className="bg-muted/40 p-2.5 rounded-xl border border-border/60 text-xs space-y-1">
+                      <div className="bg-muted/40 p-3 rounded-xl border border-border/60 text-xs space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold text-muted-foreground">Nº Certidão</span>
-                          <span className="font-mono font-bold text-foreground text-[11px]">
+                          <span className="text-xs font-medium text-muted-foreground">Nº Certidão</span>
+                          <span className="font-mono font-bold text-foreground text-xs sm:text-sm">
                             {doc.numeroDocumento || '••••••••'}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-muted-foreground">Expedição</span>
-                          <span className="text-[11px] font-medium text-foreground">{doc.dataEmissao || '-'}</span>
+                          <span className="text-xs text-muted-foreground">Expedição</span>
+                          <span className="text-xs font-medium text-foreground">{doc.dataEmissao || '-'}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-muted-foreground">Validade (90d)</span>
-                          <span className={`text-[11px] font-bold ${isExpired ? 'text-rose-600' : 'text-emerald-700'}`}>
+                          <span className="text-xs text-muted-foreground">Validade (90d)</span>
+                          <span className={`text-xs font-bold ${isExpired ? 'text-rose-600' : 'text-emerald-700'}`}>
                             {doc.dataValidade} ({isExpired ? 'Vencida' : `${doc.diasRestantesValidade}d`})
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center justify-between pt-1 gap-2">
                         <Badge
                           variant={isAprovado ? 'default' : 'destructive'}
-                          className={`text-[10px] font-bold ${
+                          className={`text-xs font-bold py-1 px-2.5 ${
                             isAprovado
                               ? 'bg-emerald-600 text-white'
                               : doc.statusValidacao === 'DIVERGENTE'
@@ -612,11 +612,11 @@ export const DiaconoDashboard: React.FC = () => {
                         >
                           {isAprovado ? (
                             <>
-                              <CheckCircle2 className="w-3 h-3 text-white" /> Aprovado (Match)
+                              <CheckCircle2 className="w-3.5 h-3.5 text-white mr-1" /> Aprovado (Match)
                             </>
                           ) : (
                             <>
-                              <AlertTriangle className="w-3 h-3 text-white" /> {doc.statusValidacao}
+                              <AlertTriangle className="w-3.5 h-3.5 text-white mr-1" /> {doc.statusValidacao}
                             </>
                           )}
                         </Badge>
@@ -625,9 +625,9 @@ export const DiaconoDashboard: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => setViewingDoc(doc)}
-                          className="text-xs font-semibold gap-1"
+                          className="text-xs font-semibold gap-1.5 h-9"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="w-4 h-4" />
                           Ver Certidão
                         </Button>
                       </div>
@@ -805,122 +805,206 @@ export const DiaconoDashboard: React.FC = () => {
           {/* Campo de Busca de Usuário */}
           <div className="max-w-md">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Buscar usuário por nome, e-mail ou rede..."
                 value={searchUserAdmin}
                 onChange={e => setSearchUserAdmin(e.target.value)}
-                className="pl-9 h-9 text-xs"
+                className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
           </div>
 
-          {/* Tabela de Usuários com shadcn Table */}
+          {/* Lista de Usuários */}
           {isLoadingUsers ? (
             <div className="py-12 text-center">
               <div className="w-8 h-8 border-3 border-muted border-t-primary rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-xs font-semibold text-muted-foreground">Carregando usuários cadastrados...</p>
+              <p className="text-xs sm:text-sm font-semibold text-muted-foreground">Carregando usuários cadastrados...</p>
             </div>
           ) : (
-            <Card className="overflow-hidden border-border shadow-xs">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-bold">Membro / Usuário</TableHead>
-                    <TableHead className="font-bold">Rede</TableHead>
-                    <TableHead className="font-bold">Data Nascimento</TableHead>
-                    <TableHead className="font-bold">Papel Atual</TableHead>
-                    <TableHead className="font-bold text-right">Alterar Papel (Admin)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map(u => {
-                    const redeMeta = REDES_DISPONIVEIS.find(r => r.id === u.rede);
-                    const isSelfAdmin = isUserAdmin(u.email);
-                    const isUpdating = updatingUserId === u.id;
+            <>
+              {/* VISÃO EM CARDS PARA MOBILE (Admin) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 block md:hidden">
+                {filteredUsers.map(u => {
+                  const redeMeta = REDES_DISPONIVEIS.find(r => r.id === u.rede);
+                  const isSelfAdmin = isUserAdmin(u.email);
+                  const isUpdating = updatingUserId === u.id;
 
-                    return (
-                      <TableRow key={u.id} className="hover:bg-muted/40 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-2.5">
-                            <Avatar size="sm" className="border border-border">
-                              {u.fotoUrl && <AvatarImage src={u.fotoUrl} alt={u.nome} />}
-                              <AvatarFallback className="text-xs font-bold bg-muted text-muted-foreground">
-                                {(u.nome || 'U').charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-foreground">{u.nome}</span>
-                                {isSelfAdmin && (
-                                  <Badge variant="outline" className="text-[9px] font-bold bg-amber-50 text-amber-800 border-amber-300 py-0 px-1.5">
-                                    Admin Principal
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-[11px] text-muted-foreground block">{u.email}</span>
+                  return (
+                    <Card key={u.id} className="p-4 shadow-xs space-y-3 border-border">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <Avatar size="default" className="border border-border">
+                            {u.fotoUrl && <AvatarImage src={u.fotoUrl} alt={u.nome} />}
+                            <AvatarFallback className="text-xs font-bold bg-muted text-muted-foreground">
+                              {(u.nome || 'U').charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="truncate">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-foreground text-sm truncate">{u.nome}</span>
+                              {isSelfAdmin && (
+                                <Badge variant="outline" className="text-[10px] font-bold bg-amber-50 text-amber-800 border-amber-300 py-0 px-1 shrink-0">
+                                  Admin
+                                </Badge>
+                              )}
                             </div>
+                            <span className="text-xs text-muted-foreground block truncate">{u.email}</span>
                           </div>
-                        </TableCell>
+                        </div>
 
-                        <TableCell>
-                          {redeMeta ? (
-                            <span
-                              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border ${redeMeta.bg} ${redeMeta.color} ${redeMeta.border}`}
-                            >
-                              {redeMeta.label}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
+                        {redeMeta && (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${redeMeta.bg} ${redeMeta.color} ${redeMeta.border}`}
+                          >
+                            {redeMeta.label}
+                          </span>
+                        )}
+                      </div>
 
-                        <TableCell className="font-mono text-foreground">
-                          {u.dataNascimento || <span className="text-amber-500 font-sans">Não cadastrada</span>}
-                        </TableCell>
-
-                        <TableCell>
+                      <div className="bg-muted/40 p-2.5 rounded-xl border border-border/60 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Data Nascimento</span>
+                          <span className="font-mono text-xs font-semibold text-foreground">
+                            {u.dataNascimento || <span className="text-amber-500 font-sans">Não cadastrada</span>}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Papel no Sistema</span>
                           <Badge
                             variant={u.role === 'DIACONO' ? 'secondary' : 'outline'}
-                            className="text-[10px] font-bold gap-1"
+                            className="text-xs font-bold gap-1 py-0.5"
                           >
-                            <UserCheck className="w-3 h-3" />
+                            <UserCheck className="w-3.5 h-3.5" />
                             {u.role === 'DIACONO' ? 'DIÁCONO' : 'USUÁRIO'}
                           </Badge>
-                        </TableCell>
+                        </div>
+                      </div>
 
-                        <TableCell className="text-right">
-                          <Button
-                            variant={u.role === 'DIACONO' ? 'outline' : 'default'}
-                            size="sm"
-                            disabled={isUpdating}
-                            onClick={() => handleToggleUserRole(u)}
-                            className={`text-xs font-semibold gap-1.5 h-8 ${
-                              u.role === 'DIACONO'
-                                ? ''
-                                : 'bg-purple-600 hover:bg-purple-700 text-white'
-                            }`}
-                            title={
-                              u.role === 'DIACONO'
-                                ? 'Rebaixar para Usuário Comum'
-                                : 'Promover este membro para Diácono'
-                            }
-                          >
-                            <ArrowRightLeft className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-                            {isUpdating
-                              ? 'Salvando...'
-                              : u.role === 'DIACONO'
-                              ? 'Tornar Usuário'
-                              : 'Promover a Diácono'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Card>
+                      <Button
+                        variant={u.role === 'DIACONO' ? 'outline' : 'default'}
+                        size="sm"
+                        disabled={isUpdating}
+                        onClick={() => handleToggleUserRole(u)}
+                        className={`w-full text-xs font-semibold gap-1.5 h-10 ${
+                          u.role === 'DIACONO'
+                            ? ''
+                            : 'bg-purple-600 hover:bg-purple-700 text-white'
+                        }`}
+                      >
+                        <ArrowRightLeft className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+                        {isUpdating
+                          ? 'Salvando alteração...'
+                          : u.role === 'DIACONO'
+                          ? 'Rebaixar para Usuário Comum'
+                          : 'Promover a Diácono'}
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* TABELA DE USUÁRIOS PARA DESKTOP */}
+              <Card className="overflow-hidden border-border shadow-xs hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-bold">Membro / Usuário</TableHead>
+                      <TableHead className="font-bold">Rede</TableHead>
+                      <TableHead className="font-bold">Data Nascimento</TableHead>
+                      <TableHead className="font-bold">Papel Atual</TableHead>
+                      <TableHead className="font-bold text-right">Alterar Papel (Admin)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map(u => {
+                      const redeMeta = REDES_DISPONIVEIS.find(r => r.id === u.rede);
+                      const isSelfAdmin = isUserAdmin(u.email);
+                      const isUpdating = updatingUserId === u.id;
+
+                      return (
+                        <TableRow key={u.id} className="hover:bg-muted/40 transition-colors">
+                          <TableCell>
+                            <div className="flex items-center gap-2.5">
+                              <Avatar size="sm" className="border border-border">
+                                {u.fotoUrl && <AvatarImage src={u.fotoUrl} alt={u.nome} />}
+                                <AvatarFallback className="text-xs font-bold bg-muted text-muted-foreground">
+                                  {(u.nome || 'U').charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-foreground text-sm">{u.nome}</span>
+                                  {isSelfAdmin && (
+                                    <Badge variant="outline" className="text-[10px] font-bold bg-amber-50 text-amber-800 border-amber-300 py-0 px-1.5">
+                                      Admin Principal
+                                    </Badge>
+                                  )}
+                                </div>
+                                <span className="text-xs text-muted-foreground block">{u.email}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+
+                          <TableCell>
+                            {redeMeta ? (
+                              <span
+                                className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold border ${redeMeta.bg} ${redeMeta.color} ${redeMeta.border}`}
+                              >
+                                {redeMeta.label}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">-</span>
+                            )}
+                          </TableCell>
+
+                          <TableCell className="font-mono text-foreground text-xs">
+                            {u.dataNascimento || <span className="text-amber-500 font-sans">Não cadastrada</span>}
+                          </TableCell>
+
+                          <TableCell>
+                            <Badge
+                              variant={u.role === 'DIACONO' ? 'secondary' : 'outline'}
+                              className="text-xs font-bold gap-1 py-0.5"
+                            >
+                              <UserCheck className="w-3.5 h-3.5" />
+                              {u.role === 'DIACONO' ? 'DIÁCONO' : 'USUÁRIO'}
+                            </Badge>
+                          </TableCell>
+
+                          <TableCell className="text-right">
+                            <Button
+                              variant={u.role === 'DIACONO' ? 'outline' : 'default'}
+                              size="sm"
+                              disabled={isUpdating}
+                              onClick={() => handleToggleUserRole(u)}
+                              className={`text-xs font-semibold gap-1.5 h-9 ${
+                                u.role === 'DIACONO'
+                                  ? ''
+                                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+                              }`}
+                              title={
+                                u.role === 'DIACONO'
+                                  ? 'Rebaixar para Usuário Comum'
+                                  : 'Promover este membro para Diácono'
+                              }
+                            >
+                              <ArrowRightLeft className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+                              {isUpdating
+                                ? 'Salvando...'
+                                : u.role === 'DIACONO'
+                                ? 'Tornar Usuário'
+                                : 'Promover a Diácono'}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Card>
+            </>
           )}
         </Card>
       )}

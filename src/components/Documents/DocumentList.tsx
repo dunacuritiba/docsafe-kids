@@ -7,7 +7,6 @@ import {
   FileText,
   AlertCircle,
   Calendar,
-  CheckCircle2,
   AlertTriangle,
   Save,
   Check,
@@ -195,8 +194,8 @@ export const DocumentList: React.FC = () => {
       )}
 
       {/* Banner Informativo sobre a Regra de 90 Dias e Validação com shadcn Card */}
-      <Card className="p-5 sm:p-7 border-border shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <Card className="p-4 sm:p-7 border-border shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
           <div className="space-y-2">
             <Badge variant="secondary" className="gap-1.5 py-1 px-3 text-xs font-semibold">
               <Calendar className="w-3.5 h-3.5 text-primary" />
@@ -217,7 +216,7 @@ export const DocumentList: React.FC = () => {
                 setIsFormOpen(true);
               }}
               size="lg"
-              className="font-bold gap-2 shadow-xs cursor-pointer"
+              className="w-full sm:w-auto font-bold gap-2 shadow-xs cursor-pointer h-11 sm:h-10 text-sm"
             >
               <Plus className="w-4 h-4" />
               Registrar Certidão
@@ -226,97 +225,99 @@ export const DocumentList: React.FC = () => {
         </div>
 
         {/* Estatísticas Rápidas */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-border/60 text-xs">
-          <div className="p-3 bg-muted/40 rounded-2xl border border-border/60">
-            <span className="text-muted-foreground block text-[11px] font-medium">Total de Certidões</span>
-            <span className="text-xl font-bold text-foreground mt-0.5 block">{documents.length}</span>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-5 pt-5 border-t border-border/60">
+          <div className="p-2.5 sm:p-3 bg-muted/40 rounded-2xl border border-border/60 text-center sm:text-left">
+            <span className="text-muted-foreground block text-xs font-medium truncate">Total</span>
+            <span className="text-lg sm:text-2xl font-black text-foreground mt-0.5 block">{documents.length}</span>
           </div>
 
-          <div className="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50">
-            <span className="text-emerald-700 dark:text-emerald-400 block text-[11px] font-medium flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Aprovadas & Válidas
+          <div className="p-2.5 sm:p-3 bg-emerald-50/70 rounded-2xl border border-emerald-100 text-center sm:text-left dark:bg-emerald-950/20 dark:border-emerald-900/50">
+            <span className="text-emerald-700 dark:text-emerald-400 block text-xs font-medium truncate">
+              Aprovadas
             </span>
-            <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-0.5 block">{totalAprovadas}</span>
+            <span className="text-lg sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 block">{totalAprovadas}</span>
           </div>
 
-          <div className="p-3 bg-rose-50/70 rounded-2xl border border-rose-100 col-span-2 sm:col-span-1 dark:bg-rose-950/20 dark:border-rose-900/50">
-            <span className="text-rose-700 dark:text-rose-400 block text-[11px] font-medium flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3 text-rose-600 dark:text-rose-400" /> Vencidas (&gt;90 dias)
+          <div className="p-2.5 sm:p-3 bg-rose-50/70 rounded-2xl border border-rose-100 text-center sm:text-left dark:bg-rose-950/20 dark:border-rose-900/50">
+            <span className="text-rose-700 dark:text-rose-400 block text-xs font-medium truncate">
+              Vencidas
             </span>
-            <span className="text-xl font-bold text-rose-700 dark:text-rose-400 mt-0.5 block">{totalExpiradas}</span>
+            <span className="text-lg sm:text-2xl font-black text-rose-700 dark:text-rose-400 mt-0.5 block">{totalExpiradas}</span>
           </div>
         </div>
       </Card>
 
       {/* Barra de Filtros e Busca */}
-      <Card className="p-4 border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <Card className="p-3 sm:p-4 border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Campo de Busca com shadcn Input */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <Input
             type="text"
-            placeholder="Buscar por número da certidão ou nome extraído..."
+            placeholder="Buscar por número da certidão ou nome..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="pl-9 h-9"
+            className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
           />
         </div>
 
-        {/* Filtro de Status com shadcn Buttons */}
-        <div className="flex rounded-xl bg-muted/60 p-1 text-xs font-medium border border-border/40">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 justify-between">
+          {/* Filtro de Status com overflow suave */}
+          <div className="flex rounded-xl bg-muted/60 p-1 text-xs font-medium border border-border/40 overflow-x-auto max-w-full">
+            <Button
+              variant={statusFilter === 'TODOS' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('TODOS')}
+              className="text-xs h-8 px-2.5 sm:px-3 font-semibold"
+            >
+              Todas
+            </Button>
+            <Button
+              variant={statusFilter === 'APROVADOS' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('APROVADOS')}
+              className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${statusFilter === 'APROVADOS' ? 'bg-emerald-600 text-white' : 'text-emerald-700'}`}
+            >
+              Aprovadas
+            </Button>
+            <Button
+              variant={statusFilter === 'DIVERGENTES' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('DIVERGENTES')}
+              className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${statusFilter === 'DIVERGENTES' ? 'bg-rose-600 text-white' : 'text-rose-700'}`}
+            >
+              Divergentes
+            </Button>
+            <Button
+              variant={statusFilter === 'EXPIRADOS' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter('EXPIRADOS')}
+              className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${statusFilter === 'EXPIRADOS' ? 'bg-amber-600 text-white' : 'text-amber-700'}`}
+            >
+              Expiradas
+            </Button>
+          </div>
+
+          {/* Toggle de Privacidade */}
           <Button
-            variant={statusFilter === 'TODOS' ? 'default' : 'ghost'}
+            variant={hideSensitive ? 'outline' : 'ghost'}
             size="sm"
-            onClick={() => setStatusFilter('TODOS')}
-            className="text-xs h-7"
+            onClick={() => setHideSensitive(!hideSensitive)}
+            className={`text-xs font-semibold gap-1.5 h-10 sm:h-9 px-3 ${
+              hideSensitive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : ''
+            }`}
           >
-            Todas
-          </Button>
-          <Button
-            variant={statusFilter === 'APROVADOS' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setStatusFilter('APROVADOS')}
-            className={`text-xs h-7 ${statusFilter === 'APROVADOS' ? 'bg-emerald-600 text-white' : 'text-emerald-700'}`}
-          >
-            Aprovadas
-          </Button>
-          <Button
-            variant={statusFilter === 'DIVERGENTES' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setStatusFilter('DIVERGENTES')}
-            className={`text-xs h-7 ${statusFilter === 'DIVERGENTES' ? 'bg-rose-600 text-white' : 'text-rose-700'}`}
-          >
-            Divergentes
-          </Button>
-          <Button
-            variant={statusFilter === 'EXPIRADOS' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setStatusFilter('EXPIRADOS')}
-            className={`text-xs h-7 ${statusFilter === 'EXPIRADOS' ? 'bg-amber-600 text-white' : 'text-amber-700'}`}
-          >
-            Expiradas
+            {hideSensitive ? (
+              <>
+                <EyeOff className="w-3.5 h-3.5 text-emerald-600" /> Ocultando
+              </>
+            ) : (
+              <>
+                <Eye className="w-3.5 h-3.5 text-muted-foreground" /> Exibindo
+              </>
+            )}
           </Button>
         </div>
-
-        {/* Toggle de Privacidade */}
-        <Button
-          variant={hideSensitive ? 'outline' : 'ghost'}
-          size="sm"
-          onClick={() => setHideSensitive(!hideSensitive)}
-          className={`text-xs font-semibold gap-1.5 h-8 ${
-            hideSensitive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : ''
-          }`}
-        >
-          {hideSensitive ? (
-            <>
-              <EyeOff className="w-3.5 h-3.5 text-emerald-600" /> Ocultando Sensíveis
-            </>
-          ) : (
-            <>
-              <Eye className="w-3.5 h-3.5 text-muted-foreground" /> Exibindo Todos
-            </>
-          )}
-        </Button>
       </Card>
 
       {/* Grid de Certidões */}

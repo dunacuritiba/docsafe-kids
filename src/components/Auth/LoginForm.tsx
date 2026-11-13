@@ -33,25 +33,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <Card className="p-6 sm:p-8 w-full max-w-md mx-auto border-border shadow-xl">
+    <Card className="p-4 sm:p-8 w-full max-w-md mx-auto border-border shadow-xl">
       {/* Cabeçalho */}
       <CardHeader className="text-center p-0 mb-6">
         <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-2xl mx-auto mb-3 shadow-xs">
           <ShieldCheck className="w-6 h-6" />
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">Acesso ao Cofre</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">Acesso ao Cofre</CardTitle>
         <CardDescription className="text-xs sm:text-sm mt-1">
           Entre para gerenciar seus documentos com proteção criptográfica LGPD.
         </CardDescription>
         <Button
           type="button"
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={() => {
             setEmail('luan@secid.pr.gov.br');
             setSenha('segredo123');
           }}
-          className="mt-2.5 mx-auto text-[11px] font-medium"
+          className="mt-3 mx-auto text-xs font-semibold h-8"
         >
           🔑 Preencher Credenciais de Teste
         </Button>
@@ -68,7 +68,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">E-mail Cadastrado</Label>
+            <Label className="text-xs sm:text-sm font-semibold">E-mail Cadastrado</Label>
             <div className="relative">
               <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
@@ -77,14 +77,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                 placeholder="seu.email@exemplo.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="pl-9 h-10"
+                className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
           </div>
 
           {/* Senha */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Senha</Label>
+            <Label className="text-xs sm:text-sm font-semibold">Senha</Label>
             <div className="relative">
               <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
@@ -93,23 +93,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                 placeholder="Sua senha secreta"
                 value={senha}
                 onChange={e => setSenha(e.target.value)}
-                className="pl-9 pr-9 h-10"
+                className="pl-9 pr-10 h-11 sm:h-10 text-base sm:text-sm"
               />
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-xs"
+                size="icon-sm"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
           </div>
 
-          <div className="p-3 bg-muted/40 rounded-xl border border-border/60 text-[11px] text-muted-foreground flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-            Sua senha deriva a chave AES-256 para decifrar seus documentos com segurança.
+          <div className="p-3 bg-muted/40 rounded-xl border border-border/60 text-xs text-muted-foreground flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
+            <span>Sua senha deriva a chave AES-256 para decifrar seus documentos com segurança.</span>
           </div>
 
           {/* Botão de Login */}
@@ -117,7 +117,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
             type="submit"
             disabled={isLoading}
             size="lg"
-            className="w-full font-semibold text-sm gap-2"
+            className="w-full font-semibold text-sm sm:text-base gap-2 h-11 sm:h-10"
           >
             {isLoading ? (
               <span className="inline-flex items-center gap-2">
@@ -135,12 +135,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
 
         {/* Alternar para Cadastro */}
         <div className="mt-6 pt-5 border-t border-border/60 text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Ainda não tem cadastro?{' '}
             <Button
               variant="link"
               onClick={onSwitchToRegister}
-              className="p-0 h-auto font-semibold text-xs text-primary"
+              className="p-0 h-auto font-semibold text-xs sm:text-sm text-primary"
             >
               Criar conta e registrar rede
             </Button>

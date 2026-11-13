@@ -43,7 +43,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   return (
     <Card className="hover:border-primary/40 shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col group py-0 gap-0">
       {/* Top Banner / Preview */}
-      <div className="relative h-36 bg-muted/50 flex items-center justify-center overflow-hidden border-b border-border/80">
+      <div className="relative h-40 bg-muted/50 flex items-center justify-center overflow-hidden border-b border-border/80">
         {document.arquivoUrl && document.arquivoUrl.startsWith('data:image') ? (
           <img
             src={document.arquivoUrl}
@@ -52,13 +52,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-muted-foreground p-4 text-center">
-            <div className="p-2.5 bg-background rounded-2xl shadow-xs mb-1.5 text-primary">
-              <FileText className="w-7 h-7" />
+            <div className="p-2.5 bg-background rounded-2xl shadow-xs mb-2 text-primary">
+              <FileText className="w-8 h-8" />
             </div>
-            <span className="text-xs font-semibold text-foreground">
+            <span className="text-xs sm:text-sm font-semibold text-foreground">
               Certidão de Antecedentes Criminais
             </span>
-            <span className="text-[10px] text-muted-foreground">PDF / Documento Anexado</span>
+            <span className="text-xs text-muted-foreground">PDF / Documento Anexado</span>
           </div>
         )}
 
@@ -66,7 +66,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
           <Badge
             variant={isAprovado ? 'default' : 'destructive'}
-            className={`text-[10px] font-bold shadow-xs flex items-center gap-1 ${
+            className={`text-xs font-bold shadow-xs flex items-center gap-1.5 py-0.5 px-2.5 ${
               isAprovado
                 ? 'bg-emerald-600 text-white'
                 : document.statusValidacao === 'DIVERGENTE'
@@ -76,34 +76,34 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
           >
             {isAprovado ? (
               <>
-                <UserCheck className="w-3 h-3" /> Titular Confirmado
+                <UserCheck className="w-3.5 h-3.5" /> Titular Confirmado
               </>
             ) : (
               <>
-                <AlertTriangle className="w-3 h-3" /> {document.statusValidacao}
+                <AlertTriangle className="w-3.5 h-3.5" /> {document.statusValidacao}
               </>
             )}
           </Badge>
 
           <span
-            className="p-1 rounded-full bg-background/90 text-emerald-600 shadow-xs border border-border"
+            className="p-1.5 rounded-full bg-background/90 text-emerald-600 shadow-xs border border-border"
             title="Protegido com Criptografia LGPD"
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-4 h-4" />
           </span>
         </div>
 
         {/* Alerta de Validade de 90 dias */}
         <div
-          className={`absolute bottom-2 left-2 px-2 py-0.5 text-white text-[10px] font-bold rounded-md flex items-center gap-1 shadow-xs ${
+          className={`absolute bottom-2.5 left-2.5 px-2.5 py-1 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs ${
             isExpired
               ? 'bg-rose-600/90'
               : isExpiringSoon
               ? 'bg-amber-600/90'
-              : 'bg-slate-900/80 backdrop-blur-xs'
+              : 'bg-slate-900/85 backdrop-blur-xs'
           }`}
         >
-          <Calendar className="w-3 h-3" />
+          <Calendar className="w-3.5 h-3.5" />
           {isExpired
             ? 'Certidão Vencida (> 90 dias)'
             : `Validade: ${document.diasRestantesValidade} dias restantes`}
@@ -111,29 +111,29 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       </div>
 
       {/* Body */}
-      <CardContent className="p-4 flex-1 flex flex-col justify-between">
+      <CardContent className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
-          <h4 className="font-bold text-foreground text-sm leading-snug line-clamp-1 group-hover:text-primary transition-colors">
+          <h4 className="font-bold text-foreground text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-primary transition-colors">
             {document.titulo}
           </h4>
 
           {/* Número da certidão */}
-          <div className="mt-2 p-2 bg-muted/40 rounded-xl border border-border/60 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-mono text-foreground">
-              <Lock className="w-3 h-3 text-muted-foreground" />
+          <div className="mt-2.5 p-2.5 bg-muted/40 rounded-xl border border-border/60 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-mono text-foreground">
+              <Lock className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="font-semibold">{displayNumero}</span>
             </div>
-            <Badge variant="outline" className="text-[9px] font-semibold py-0 px-1.5">
+            <Badge variant="outline" className="text-xs font-semibold py-0.5 px-2">
               Protegido
             </Badge>
           </div>
 
           {/* Dados Cruzados */}
-          <div className="mt-3 space-y-1.5 text-[11px] text-muted-foreground">
+          <div className="mt-3.5 space-y-2 text-xs text-muted-foreground">
             {document.nomeExtraido && (
               <p className="flex items-center justify-between">
                 <span>Nome Certidão:</span>
-                <span className="font-semibold text-foreground truncate max-w-[160px]">
+                <span className="font-semibold text-foreground truncate max-w-[180px]">
                   {document.nomeExtraido}
                 </span>
               </p>
@@ -148,16 +148,16 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
               </p>
             )}
 
-            <p className="flex items-center justify-between pt-1 border-t border-border/50">
-              <span className="flex items-center gap-1">
-                <Building className="w-3 h-3" /> Expedição:
+            <p className="flex items-center justify-between pt-1.5 border-t border-border/50">
+              <span className="flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-muted-foreground" /> Expedição:
               </span>
               <span className="font-medium text-foreground">{document.dataEmissao}</span>
             </p>
 
             <p className="flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Vence em:
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> Vence em:
               </span>
               <span className={`font-bold ${isExpired ? 'text-rose-600' : 'text-emerald-700'}`}>
                 {document.dataValidade}
@@ -167,35 +167,35 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         </div>
 
         {/* Footer com botões shadcn */}
-        <div className="pt-3.5 mt-3 border-t border-border/60 flex items-center justify-between">
+        <div className="pt-4 mt-3 border-t border-border/60 flex items-center justify-between">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onView(document)}
-            className="text-xs font-semibold gap-1.5"
+            className="text-xs font-semibold gap-1.5 h-9"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-4 h-4" />
             Visualizar
           </Button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               onClick={() => onEdit(document)}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-9 w-9"
               title="Editar informações"
             >
-              <Edit2 className="w-3.5 h-3.5" />
+              <Edit2 className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               onClick={() => onDelete(document.id)}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
               title="Excluir certidão"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         </div>

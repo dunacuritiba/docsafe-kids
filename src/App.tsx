@@ -37,16 +37,16 @@ export const AppContent: React.FC = () => {
   // Se não estiver logado, exibe tela de Autenticação (Login ou Cadastro)
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
-        {/* Header Superior Limpo */}
-        <div className="max-w-6xl w-full mx-auto flex items-center justify-between py-2">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-xs">
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-between p-3 sm:p-6 lg:p-8">
+        {/* Header Superior */}
+        <div className="max-w-6xl w-full mx-auto flex items-center justify-between py-2 sm:py-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-xs">
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <span className="font-extrabold text-foreground text-base tracking-tight">DocSafe</span>
-              <Badge variant="secondary" className="ml-1.5 text-[9px] font-bold uppercase py-0 px-1.5">
+              <span className="font-extrabold text-foreground text-lg tracking-tight">DocSafe</span>
+              <Badge variant="secondary" className="ml-1.5 text-xs font-bold uppercase py-0.5 px-2">
                 LGPD
               </Badge>
             </div>
@@ -57,7 +57,7 @@ export const AppContent: React.FC = () => {
               variant={authView === 'LOGIN' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setAuthView('LOGIN')}
-              className="text-xs font-semibold h-8"
+              className="text-xs font-semibold h-9 px-3.5"
             >
               Entrar
             </Button>
@@ -65,59 +65,59 @@ export const AppContent: React.FC = () => {
               variant={authView === 'REGISTER' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setAuthView('REGISTER')}
-              className="text-xs font-semibold h-8"
+              className="text-xs font-semibold h-9 px-3.5"
             >
               Cadastrar
             </Button>
           </div>
         </div>
 
-        {/* Conteúdo Central */}
-        <div className="max-w-5xl w-full mx-auto my-auto py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Lado Esquerdo: Mensagem de valor e segurança */}
-            <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/70 border border-blue-200 text-blue-800 text-xs font-semibold">
+        {/* Conteúdo Central Responsivo */}
+        <div className="max-w-5xl w-full mx-auto my-auto py-6 sm:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
+            {/* Lado Esquerdo: Mensagem de valor */}
+            <div className="lg:col-span-6 space-y-4 sm:space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold">
                 <Lock className="w-3.5 h-3.5 text-blue-600" />
                 Segurança Criptográfica & Proteção de Dados
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
                 Validação de Antecedentes Criminais com{' '}
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <span className="text-blue-600">
                   Blindagem LGPD
                 </span>
               </h1>
 
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <p className="text-xs sm:text-sm lg:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Plataforma corporativa moderna para vincular sua rede e validar <strong>Certidões de Antecedentes Criminais (PF e Civil)</strong>. O sistema cruza automaticamente o <strong>Nome</strong> e a <strong>Data de Nascimento</strong> do titular e monitora o prazo legal de validade de até <strong>90 dias</strong> a partir da expedição.
               </p>
 
               {/* Destaques das Funcionalidades */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-slate-700 max-w-lg mx-auto lg:mx-0">
-                <div className="p-3 bg-white/70 backdrop-blur-xs rounded-xl border border-slate-200/80 flex items-center gap-2.5">
-                  <div className="p-1.5 bg-blue-100 text-blue-700 rounded-lg flex-shrink-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs text-slate-700 max-w-lg mx-auto lg:mx-0">
+                <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 text-blue-700 rounded-lg flex-shrink-0">
                     <Camera className="w-4 h-4" />
                   </div>
                   <span className="font-medium text-left">Upload de PDF ou Foto da Câmera</span>
                 </div>
 
-                <div className="p-3 bg-white/70 backdrop-blur-xs rounded-xl border border-slate-200/80 flex items-center gap-2.5">
-                  <div className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg flex-shrink-0">
+                <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+                  <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg flex-shrink-0">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <span className="font-medium text-left">Validade Legal de 90 Dias</span>
                 </div>
 
-                <div className="p-3 bg-white/70 backdrop-blur-xs rounded-xl border border-slate-200/80 flex items-center gap-2.5">
-                  <div className="p-1.5 bg-purple-100 text-purple-700 rounded-lg flex-shrink-0">
+                <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+                  <div className="p-2 bg-purple-50 text-purple-700 rounded-lg flex-shrink-0">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <span className="font-medium text-left">Cruzamento de Nome e Nascimento</span>
                 </div>
 
-                <div className="p-3 bg-white/70 backdrop-blur-xs rounded-xl border border-slate-200/80 flex items-center gap-2.5">
-                  <div className="p-1.5 bg-amber-100 text-amber-700 rounded-lg flex-shrink-0">
+                <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+                  <div className="p-2 bg-amber-50 text-amber-700 rounded-lg flex-shrink-0">
                     <FileText className="w-4 h-4" />
                   </div>
                   <span className="font-medium text-left">Supervisão para Diáconos</span>
@@ -149,7 +149,7 @@ export const AppContent: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar currentTab={currentTab} onTabChange={setCurrentTab} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-8">
         {currentTab === 'DIACONO' && user.role === 'DIACONO' ? (
           <DiaconoDashboard />
         ) : currentTab === 'DOCUMENTS' ? (

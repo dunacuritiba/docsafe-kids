@@ -346,7 +346,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[94vh] flex flex-col overflow-hidden border border-slate-200">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
         {/* Header */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2.5">
@@ -354,17 +354,17 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-sm sm:text-base">
-                {documentToEdit ? 'Editar Certidão' : 'Registrar Certidão de Antecedentes Criminais'}
+              <h3 className="font-bold text-slate-800 text-base sm:text-lg">
+                {documentToEdit ? 'Editar Certidão' : 'Registrar Certidão de Antecedentes'}
               </h3>
-              <p className="text-[10px] sm:text-[11px] text-slate-500">
+              <p className="text-xs text-slate-500">
                 Validade legal de 90 dias com verificação de Nome e Data de Nascimento.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 transition-colors"
+            className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-200/50 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -373,7 +373,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
         {/* Formulário com Scroll Responsivo */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-4">
           {errorMessage && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-start gap-2">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -383,40 +383,40 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
           <div className="p-4 sm:p-5 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 hover:border-slate-400 transition-colors text-center">
             <div className="flex items-center justify-center gap-2 mb-1.5">
               <FileText className="w-4 h-4 text-slate-700" />
-              <span className="text-xs sm:text-sm font-bold text-slate-800">
+              <span className="text-sm font-bold text-slate-800">
                 Carregue o arquivo da Certidão (PDF ou Imagem)
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 mb-3 max-w-lg mx-auto">
+            <p className="text-xs text-slate-500 mb-3 max-w-lg mx-auto">
               O sistema lê automaticamente o número, nome, data de nascimento e data de expedição para calcular os 90 dias de validade legal.
             </p>
 
             {isScanning ? (
               <div className="py-6 flex flex-col items-center justify-center">
                 <RefreshCw className="w-7 h-7 text-slate-700 animate-spin mb-2" />
-                <p className="text-xs font-semibold text-slate-800">{scanStatusMessage}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Cruzando dados com seu cadastro...</p>
+                <p className="text-xs sm:text-sm font-semibold text-slate-800">{scanStatusMessage}</p>
+                <p className="text-xs text-slate-400 mt-0.5">Cruzando dados com seu cadastro...</p>
               </div>
             ) : arquivoUrl ? (
-              <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl shadow-xs">
+              <div className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
                 <div className="flex items-center gap-3 overflow-hidden text-left">
                   {arquivoUrl.startsWith('data:image') ? (
                     <img
                       src={arquivoUrl}
                       alt="Prévia"
-                      className="w-12 h-12 rounded-lg object-cover border border-slate-200 flex-shrink-0"
+                      className="w-14 h-14 rounded-lg object-cover border border-slate-200 flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-6 h-6" />
+                    <div className="w-14 h-14 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-7 h-7" />
                     </div>
                   )}
                   <div className="truncate">
-                    <p className="text-xs font-semibold text-slate-800 truncate">
+                    <p className="text-sm font-semibold text-slate-800 truncate">
                       {nomeArquivo || 'Certidão anexada'}
                     </p>
-                    <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
+                    <p className="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5">
+                      <ShieldCheck className="w-3.5 h-3.5" />
                       {formatFileSize(tamanhoArquivo)} • Análise Concluída
                     </p>
                   </div>
@@ -429,10 +429,10 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                       setArquivoUrl(undefined);
                       setNomeArquivo(undefined);
                     }}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                     title="Remover anexo"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -440,8 +440,8 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 py-1">
                 <Button
                   asChild
-                  size="sm"
-                  className="w-full sm:w-auto text-xs font-semibold gap-2 cursor-pointer h-9 px-4"
+                  size="default"
+                  className="w-full sm:w-auto text-xs sm:text-sm font-semibold gap-2 cursor-pointer h-11 sm:h-10 px-4"
                 >
                   <label>
                     <Upload className="w-4 h-4" />
@@ -458,9 +458,9 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => setIsCameraOpen(true)}
-                  className="w-full sm:w-auto text-xs font-semibold gap-2 h-9 px-4"
+                  className="w-full sm:w-auto text-xs sm:text-sm font-semibold gap-2 h-11 sm:h-10 px-4"
                 >
                   <Camera className="w-4 h-4 text-muted-foreground" />
                   Fotografar Certidão com Câmera
@@ -471,13 +471,13 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
           {/* PAINEL DE VERIFICAÇÃO CRUZADA DOS DADOS */}
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
                 <UserCheck className="w-4 h-4 text-blue-600" />
-                Validação Cruzada: Documento vs Usuário Cadastrado
+                Validação Cruzada: Documento vs Cadastro
               </span>
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                className={`px-2.5 py-0.5 rounded-full text-xs font-bold w-fit ${
                   statusValidacao === 'APROVADO'
                     ? 'bg-emerald-100 text-emerald-800'
                     : statusValidacao === 'DIVERGENTE'
@@ -494,23 +494,23 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               {/* Nome */}
-              <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <div className="p-3 rounded-xl bg-white border border-slate-200">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Nome do Titular</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase">Nome do Titular</span>
                   {isNomeMatch ? (
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Confere
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Confere
                     </span>
                   ) : (
-                    <span className="text-[10px] font-bold text-rose-600 flex items-center gap-0.5">
-                      <AlertCircle className="w-3 h-3" /> Divergente
+                    <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" /> Divergente
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-xs text-slate-600">
                   Usuário: <strong className="text-slate-800">{user?.nome}</strong>
                 </p>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Certidão: <strong className={isNomeMatch ? 'text-emerald-700' : 'text-rose-700'}>
                     {nomeExtraido || '(Aguardando leitura...)'}
                   </strong>
@@ -518,26 +518,26 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
               </div>
 
               {/* Data de Nascimento */}
-              <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+              <div className="p-3 rounded-xl bg-white border border-slate-200">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Data de Nascimento</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase">Data de Nascimento</span>
                   {isNascMatch ? (
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Confere
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Confere
                     </span>
                   ) : (
-                    <span className="text-[10px] font-bold text-rose-600 flex items-center gap-0.5">
-                      <AlertCircle className="w-3 h-3" /> Divergente
+                    <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" /> Divergente
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-xs text-slate-600">
                   Usuário:{' '}
                   <strong className={user?.dataNascimento ? 'text-slate-800' : 'text-amber-600'}>
                     {user?.dataNascimento ? normalizeDate(user.dataNascimento) : '(Não informada no cadastro)'}
                   </strong>
                 </p>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Certidão: <strong className={isNascMatch ? 'text-emerald-700' : 'text-rose-700'}>
                     {dataNascExtraida || '(Aguardando leitura...)'}
                   </strong>
@@ -551,9 +551,9 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                       await updateBirthDate(dataNascExtraida);
                       setSavingUserBirth(false);
                     }}
-                    className="mt-2 text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                    className="mt-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
                   >
-                    <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                     {savingUserBirth ? 'Salvando...' : `Salvar ${dataNascExtraida} no meu cadastro`}
                   </button>
                 )}
@@ -561,13 +561,13 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
             </div>
 
             {/* Alerta de Validade de 90 dias */}
-            <div className={`p-2.5 rounded-xl border text-xs flex items-center justify-between ${
+            <div className={`p-3 rounded-xl border text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 ${
               isExpirada
                 ? 'bg-rose-50 border-rose-200 text-rose-800'
                 : 'bg-emerald-50 border-emerald-200 text-emerald-800'
             }`}>
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4 shrink-0" />
                 <span>
                   <strong>Regra de 90 Dias:</strong>{' '}
                   {dataExpedicao ? (
@@ -580,7 +580,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                 </span>
               </div>
               {dataExpedicao && (
-                <span className="font-bold text-[11px]">
+                <span className="font-bold text-xs sm:text-sm">
                   {isExpirada ? 'VENCIDA' : `${diasRestantes} dias restantes`}
                 </span>
               )}
@@ -588,13 +588,13 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
           </div>
 
           {/* Dados do Formulário para Ajuste / Confirmação */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">
+                <Label className="text-xs sm:text-sm font-semibold">
                   Número da Certidão <span className="text-destructive">*</span>
                 </Label>
-                <Badge variant="outline" className="text-[10px] py-0 px-1.5">
+                <Badge variant="outline" className="text-xs py-0 px-1.5">
                   <Lock className="w-2.5 h-2.5 mr-0.5" /> Protegido
                 </Badge>
               </div>
@@ -604,25 +604,25 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                 placeholder="Ex: 216367922026"
                 value={numeroCertidao}
                 onChange={e => setNumeroCertidao(e.target.value)}
-                className="font-mono text-xs sm:text-sm h-9"
+                className="font-mono text-base sm:text-sm h-11 sm:h-10"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Órgão Expedidor</Label>
+              <Label className="text-xs sm:text-sm font-semibold">Órgão Expedidor</Label>
               <Input
                 type="text"
                 value={orgaoEmissor}
                 onChange={e => setOrgaoEmissor(e.target.value)}
-                className="text-xs sm:text-sm h-9"
+                className="text-base sm:text-sm h-11 sm:h-10"
               />
             </div>
           </div>
 
           {/* Datas: Expedição e Validade Calculada */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
+              <Label className="text-xs sm:text-sm font-semibold">
                 Data de Expedição no Documento <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -631,50 +631,50 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                 required
                 value={dataExpedicao}
                 onChange={e => handleExpedicaoChange(e.target.value)}
-                className="text-xs sm:text-sm h-9"
+                className="text-base sm:text-sm h-11 sm:h-10"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Validade Legal (Exatos 90 Dias)</Label>
+              <Label className="text-xs sm:text-sm font-semibold">Validade Legal (Exatos 90 Dias)</Label>
               <Input
                 type="text"
                 readOnly
                 value={dataValidade ? `${dataValidade} (${diasRestantes} dias)` : ''}
                 placeholder="Calculada automaticamente"
-                className="bg-muted text-muted-foreground font-semibold text-xs sm:text-sm h-9"
+                className="bg-muted text-muted-foreground font-semibold text-base sm:text-sm h-11 sm:h-10"
               />
             </div>
           </div>
 
           {/* Observações */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Observações Adicionais</Label>
+            <Label className="text-xs sm:text-sm font-semibold">Observações Adicionais</Label>
             <textarea
               rows={2}
               placeholder="Ex: Certidão original emitida pelo portal da Polícia Federal..."
               value={observacoes}
               onChange={e => setObservacoes(e.target.value)}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
+              className="w-full px-3 py-2 bg-background border border-input rounded-lg text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-2 flex items-center justify-end gap-2.5">
+          <div className="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="default"
               onClick={onClose}
-              className="text-xs font-medium"
+              className="text-xs sm:text-sm font-medium h-11 sm:h-10"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isSaving}
-              size="sm"
-              className="font-semibold text-xs gap-1.5"
+              size="default"
+              className="font-semibold text-xs sm:text-sm gap-2 h-11 sm:h-10"
             >
               {isSaving ? (
                 <span className="inline-flex items-center gap-1.5">
@@ -683,7 +683,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                 </span>
               ) : (
                 <>
-                  <Lock className="w-3.5 h-3.5" />
+                  <Lock className="w-4 h-4" />
                   Salvar Certidão Criptografada
                 </>
               )}
