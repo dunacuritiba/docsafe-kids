@@ -1,5 +1,17 @@
-import React from 'react';
-import { ShieldCheck, LogOut, FileText, User as UserIcon, Lock, Users, ShieldAlert, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import {
+  ShieldCheck,
+  LogOut,
+  FileText,
+  User as UserIcon,
+  Lock,
+  Users,
+  ShieldAlert,
+  Sparkles,
+  ChevronDown,
+  Check,
+  LayoutGrid,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { REDES_DISPONIVEIS, isUserAdmin } from '../types';
 import { Button } from '@/components/ui/button';
@@ -13,12 +25,54 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
   const { user, logout, toggleRole } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   if (!user) return null;
 
   const redeMeta = REDES_DISPONIVEIS.find(r => r.id === user.rede);
   const isAdmin = isUserAdmin(user.email);
   const isDiacono = user.role === 'DIACONO' || isAdmin;
+
+  // Fecha o dropdown ao clicar fora ou pressionar ESC
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    }
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDropdownOpen]);
+
+  // Metadados da aba atual
+  const currentTabMeta = useMemo(() => {
+    switch (currentTab) {
+      case 'DIACONO':
+        return { label: 'Painel do Diácono', icon: ShieldAlert, color: 'text-purple-600' };
+      case 'USERS':
+        return { label: 'Gestão de Usuários', icon: Users, color: 'text-emerald-600' };
+      case 'DOCUMENTS':
+        return { label: 'Minhas Certidões', icon: FileText, color: 'text-primary' };
+      case 'PROFILE':
+        return { label: 'Meu Perfil', icon: UserIcon, color: 'text-blue-600' };
+      case 'LGPD':
+        return { label: 'Privacidade & LGPD', icon: Lock, color: 'text-emerald-600' };
+      default:
+        return { label: 'Menu de Telas', icon: LayoutGrid, color: 'text-foreground' };
+    }
+  }, [currentTab]);
 
   return (
     <>
@@ -47,82 +101,205 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               </div>
             </div>
 
-            {/* Abas de Navegação (Desktop: md e acima) */}
-            <nav className="hidden md:flex items-center gap-1 p-1 bg-muted/60 rounded-xl border border-border/40">
-              {isDiacono && (
-                <>
-                  <Button
-                    variant={currentTab === 'DIACONO' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onTabChange('DIACONO')}
-                    className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
-                      currentTab === 'DIACONO'
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-xs'
-                        : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 font-bold'
-                    }`}
-                    title="Supervisão geral das certidões e relatórios"
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0" />
-                    Painel do Diácono
-                  </Button>
+            {/* Menu Dropdown de Telas / Views (Desktop: md e acima) */}
+            <div className="hidden md:block relative" ref={dropdownRef}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="text-xs sm:text-sm font-semibold gap-2.5 h-10 px-4 rounded-2xl border-border bg-background hover:bg-muted/70 shadow-xs cursor-pointer transition-all"
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="true"
+              >
+                <div className="p-1 rounded-lg bg-primary/10 text-primary">
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-muted-foreground text-xs font-normal">Telas:</span>
+                <span className="font-bold text-foreground flex items-center gap-1.5">
+                  <currentTabMeta.icon className={`w-3.5 h-3.5 ${currentTabMeta.color}`} />
+                  {currentTabMeta.label}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 ${
+                    isDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </Button>
 
-                  <Button
-                    variant={currentTab === 'USERS' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onTabChange('USERS')}
-                    className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
-                      currentTab === 'USERS'
-                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
-                        : 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 font-bold'
-                    }`}
-                    title="Gestão de Usuários: editar dados e alterar fotos de perfil de membros"
-                  >
-                    <Users className="w-3.5 h-3.5 flex-shrink-0" />
-                    Gestão de Usuários
-                  </Button>
-                </>
+              {/* Conteúdo Dropdown */}
+              {isDropdownOpen && (
+                <div className="absolute left-0 mt-2 w-72 bg-popover text-popover-foreground rounded-2xl border border-border shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {isDiacono && (
+                    <div className="mb-1 pb-1 border-b border-border/60">
+                      <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                        Supervisão Diaconal
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onTabChange('DIACONO');
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs font-semibold transition-colors cursor-pointer ${
+                          currentTab === 'DIACONO'
+                            ? 'bg-purple-50 text-purple-900 dark:bg-purple-950/50 dark:text-purple-200'
+                            : 'hover:bg-muted text-foreground'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`p-1.5 rounded-lg ${
+                              currentTab === 'DIACONO'
+                                ? 'bg-purple-100 dark:bg-purple-900/60'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <ShieldAlert className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div>
+                            <span className="font-bold block">Painel do Diácono</span>
+                            <span className="text-[11px] text-muted-foreground block font-normal">
+                              Supervisão das certidões e 90 dias
+                            </span>
+                          </div>
+                        </div>
+                        {currentTab === 'DIACONO' && <Check className="w-4 h-4 text-purple-600" />}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onTabChange('USERS');
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs font-semibold transition-colors cursor-pointer mt-0.5 ${
+                          currentTab === 'USERS'
+                            ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200'
+                            : 'hover:bg-muted text-foreground'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`p-1.5 rounded-lg ${
+                              currentTab === 'USERS'
+                                ? 'bg-emerald-100 dark:bg-emerald-900/60'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <Users className="w-4 h-4 text-emerald-600" />
+                          </div>
+                          <div>
+                            <span className="font-bold block">Gestão de Usuários</span>
+                            <span className="text-[11px] text-muted-foreground block font-normal">
+                              Editar dados e fotos dos membros
+                            </span>
+                          </div>
+                        </div>
+                        {currentTab === 'USERS' && <Check className="w-4 h-4 text-emerald-600" />}
+                      </button>
+                    </div>
+                  )}
+
+                  <div>
+                    <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                      Minha Conta & Documentos
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTabChange('DOCUMENTS');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs font-semibold transition-colors cursor-pointer ${
+                        currentTab === 'DOCUMENTS'
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-muted text-foreground'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            currentTab === 'DOCUMENTS' ? 'bg-primary/20' : 'bg-muted'
+                          }`}
+                        >
+                          <FileText className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <span className="font-bold block">Minhas Certidões</span>
+                          <span className="text-[11px] text-muted-foreground block font-normal">
+                            Consultar e registrar antecedentes
+                          </span>
+                        </div>
+                      </div>
+                      {currentTab === 'DOCUMENTS' && <Check className="w-4 h-4 text-primary" />}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTabChange('PROFILE');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs font-semibold transition-colors cursor-pointer mt-0.5 ${
+                        currentTab === 'PROFILE'
+                          ? 'bg-blue-50 text-blue-900 dark:bg-blue-950/50 dark:text-blue-200'
+                          : 'hover:bg-muted text-foreground'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            currentTab === 'PROFILE' ? 'bg-blue-100 dark:bg-blue-900/60' : 'bg-muted'
+                          }`}
+                        >
+                          <UserIcon className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <span className="font-bold block">Meu Perfil</span>
+                          <span className="text-[11px] text-muted-foreground block font-normal">
+                            Meus dados cadastrais e foto
+                          </span>
+                        </div>
+                      </div>
+                      {currentTab === 'PROFILE' && <Check className="w-4 h-4 text-blue-600" />}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTabChange('LGPD');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs font-semibold transition-colors cursor-pointer mt-0.5 ${
+                        currentTab === 'LGPD'
+                          ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200'
+                          : 'hover:bg-muted text-foreground'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            currentTab === 'LGPD' ? 'bg-emerald-100 dark:bg-emerald-900/60' : 'bg-muted'
+                          }`}
+                        >
+                          <Lock className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <div>
+                          <span className="font-bold block">Privacidade & LGPD</span>
+                          <span className="text-[11px] text-muted-foreground block font-normal">
+                            Criptografia e termos legais
+                          </span>
+                        </div>
+                      </div>
+                      {currentTab === 'LGPD' && <Check className="w-4 h-4 text-emerald-600" />}
+                    </button>
+                  </div>
+                </div>
               )}
-
-              <Button
-                variant={currentTab === 'DOCUMENTS' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => onTabChange('DOCUMENTS')}
-                className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
-                  currentTab === 'DOCUMENTS' ? 'shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 flex-shrink-0" />
-                Minhas Certidões
-              </Button>
-
-              <Button
-                variant={currentTab === 'PROFILE' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => onTabChange('PROFILE')}
-                className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
-                  currentTab === 'PROFILE'
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <UserIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                Meu Perfil
-              </Button>
-
-              <Button
-                variant={currentTab === 'LGPD' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => onTabChange('LGPD')}
-                className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
-                  currentTab === 'LGPD'
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Lock className="w-3.5 h-3.5 flex-shrink-0" />
-                Privacidade & LGPD
-              </Button>
-            </nav>
+            </div>
 
             {/* Perfil do Usuário e Logout */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
