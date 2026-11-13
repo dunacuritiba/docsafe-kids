@@ -1,9 +1,9 @@
 import type { DocumentRecord } from '../types';
 
 /**
- * Converte dataUrl base64 em Blob para download universal sem restrições de tamanho
+ * Converte dataUrl base64 em Blob para download e preview universal sem restrições de tamanho
  */
-function dataUrlToBlob(dataUrl: string): Blob {
+export function dataUrlToBlob(dataUrl: string): Blob {
   try {
     const parts = dataUrl.split(',');
     const mimeMatch = parts[0].match(/:(.*?);/);
@@ -122,7 +122,162 @@ function downloadValidationReceiptFile(doc: DocumentRecord, cleanTitular: string
 }
 
 /**
- * Abre a janela de impressão da certidão do usuário
+ * Imprime o documento PDF original do usuário com altíssima definição (DPI A4) usando PDF.js
+ */
+export async function printPdfDocument(dataUrlOrUrl: string, doc: DocumentRecord) {
+  const titular = doc.userNome || doc.nomeExtraido || 'Certidão';
+
+  // Abre janela popup de impressão imediatamente no clique do usuário (evita bloqueio de popup)
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Imprimindo PDF - ${titular}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #334155; background: #f8fafc; }
+          .spinner { width: 44px; height: 44px; border: 4px solid #cbd5e1; border-top-color: #0284c7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+          h2 { margin: 0 0 8px 0; font-size: 18px; color: #0f172a; }
+          p { margin: 4px 0; font-size: 13px; color: #64748b; }
+        </style>
+      </head>
+      <body>
+        <div class="spinner"></div>
+        <h2>Processando o PDF da Certidão...</h2>
+        <p>Preparando as páginas originais do documento para impressão em alta definição.</p>
+        <p style="font-size: 11px; color: #94a3b8; margin-top: 12px;">A tela de impressão do navegador abrirá automaticamente em instantes.</p>
+      </body>
+      </html>
+    `);
+  }
+
+  try {
+    const pdfjs = await import('pdfjs-dist');
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+    }
+
+    let loadingTask;
+    if (dataUrlOrUrl.startsWith('data:')) {
+      const base64 = dataUrlOrUrl.split(',')[1];
+      const binaryString = window.atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      loadingTask = pdfjs.getDocument({ data: bytes });
+    } else {
+      loadingTask = pdfjs.getDocument({ url: dataUrlOrUrl });
+    }
+
+    const pdf = await loadingTask.promise;
+    const pageImages: string[] = [];
+
+    // Renderiza cada página do PDF em escala 2.0 (nitidez total para impressão A4)
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+        pageImages.push(canvas.toDataURL('image/png'));
+      }
+    }
+
+    if (pageImages.length === 0) {
+      throw new Error('Nenhuma página do PDF foi renderizada.');
+    }
+
+    const pagesHtml = pageImages
+      .map(
+        (imgUrl, idx) => `
+        <div class="pdf-page-container">
+          <img src="${imgUrl}" class="pdf-page-img" alt="Página ${idx + 1}" />
+        </div>`
+      )
+      .join('\n');
+
+    const targetWindow = printWindow || window.open('', '_blank');
+    if (!targetWindow) {
+      alert('Por favor, permita pop-ups para imprimir a certidão.');
+      return;
+    }
+
+    targetWindow.document.open();
+    targetWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Certidão de Antecedentes Criminais - ${titular}</title>
+        <style>
+          @page { size: auto; margin: 0; }
+          html, body { margin: 0; padding: 0; background: #fff; }
+          .pdf-page-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          .pdf-page-img {
+            width: 100%;
+            max-width: 210mm;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+          }
+          @media print {
+            body { margin: 0; padding: 0; }
+            .pdf-page-container { page-break-after: always; }
+          }
+        </style>
+      </head>
+      <body>
+        ${pagesHtml}
+        <script>
+          window.addEventListener('load', () => {
+            setTimeout(() => {
+              window.focus();
+              window.print();
+            }, 350);
+          });
+        </script>
+      </body>
+      </html>
+    `);
+    targetWindow.document.close();
+  } catch (err) {
+    console.error('Falha ao renderizar PDF para impressão via canvas:', err);
+    // Fallback: se falhar o renderizador, abre o PDF nativo em nova aba
+    if (dataUrlOrUrl.startsWith('data:')) {
+      const blob = dataUrlToBlob(dataUrlOrUrl);
+      const blobUrl = URL.createObjectURL(blob);
+      if (printWindow) {
+        printWindow.location.href = blobUrl;
+      } else {
+        window.open(blobUrl, '_blank');
+      }
+    } else {
+      if (printWindow) {
+        printWindow.location.href = dataUrlOrUrl;
+      } else {
+        window.open(dataUrlOrUrl, '_blank');
+      }
+    }
+  }
+}
+
+/**
+ * Abre a janela de impressão da certidão do usuário (PDF ou Imagem)
  */
 export function printDocument(doc: DocumentRecord) {
   if (!doc.arquivoUrl) {
@@ -186,34 +341,8 @@ export function printDocument(doc: DocumentRecord) {
     return;
   }
 
-  // Se for PDF (data:application/pdf ou URL)
-  // Cria iframe invisível ou abre janela dedicada para acionar window.print()
-  const iframe = window.document.createElement('iframe');
-  iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = '0';
-  iframe.src = doc.arquivoUrl;
-
-  window.document.body.appendChild(iframe);
-
-  iframe.onload = () => {
-    try {
-      setTimeout(() => {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-        setTimeout(() => {
-          window.document.body.removeChild(iframe);
-        }, 3000);
-      }, 300);
-    } catch {
-      // Se iframe for restrito por sandbox de browser, abre em nova janela
-      window.open(doc.arquivoUrl, '_blank');
-      window.document.body.removeChild(iframe);
-    }
-  };
+  // Se for PDF
+  printPdfDocument(doc.arquivoUrl, doc);
 }
 
 /**

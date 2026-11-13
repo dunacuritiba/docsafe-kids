@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   X,
-  FileText,
   Lock,
   Download,
   Printer,
@@ -25,7 +24,7 @@ import { formatFileSize } from '../../utils/masks';
 import { normalizeString, normalizeDate } from '../../utils/certidaoParser';
 import { getStoredUsers } from '../../utils/storage';
 import { supabaseGetUserByEmail } from '../../services/supabase';
-import { downloadDocumentFile, printDocument } from '../../utils/documentExport';
+import { downloadDocumentFile, printDocument, dataUrlToBlob } from '../../utils/documentExport';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,6 +47,28 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
   const [showNumber, setShowNumber] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showRawEncrypted, setShowRawEncrypted] = useState(false);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+
+  // Cria URL de blob segura para preview e impressão de PDFs sem restrições
+  useEffect(() => {
+    if (document?.arquivoUrl && !document.arquivoUrl.startsWith('data:image')) {
+      if (document.arquivoUrl.startsWith('data:')) {
+        try {
+          const blob = dataUrlToBlob(document.arquivoUrl);
+          const url = URL.createObjectURL(blob);
+          setPdfBlobUrl(url);
+          return () => URL.revokeObjectURL(url);
+        } catch (e) {
+          console.warn('Erro ao criar blobUrl do PDF:', e);
+          setPdfBlobUrl(document.arquivoUrl);
+        }
+      } else {
+        setPdfBlobUrl(document.arquivoUrl);
+      }
+    } else {
+      setPdfBlobUrl(null);
+    }
+  }, [document?.arquivoUrl]);
 
   // Identifica o titular do documento (membro dono da certidão)
   useEffect(() => {
@@ -444,7 +465,7 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
                 </div>
               </div>
 
-              <div className="p-4 bg-muted/20 flex items-center justify-center max-h-80 overflow-auto">
+              <div className="p-3 bg-muted/20 flex flex-col items-center justify-center">
                 {document.arquivoUrl.startsWith('data:image') ? (
                   <img
                     src={document.arquivoUrl}
@@ -452,25 +473,47 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
                     className="max-h-72 rounded-lg object-contain shadow-xs border border-border"
                   />
                 ) : (
-                  <div className="text-center py-8">
-                    <FileText className="w-16 h-16 text-primary mx-auto mb-2 opacity-80" />
-                    <p className="text-xs sm:text-sm text-foreground font-medium">Arquivo PDF da Certidão Anexado</p>
-                    <div className="flex items-center justify-center gap-3 mt-3">
-                      <button
-                        type="button"
-                        onClick={downloadFile}
-                        className="text-xs sm:text-sm text-primary hover:underline flex items-center gap-1.5 cursor-pointer font-semibold"
-                      >
-                        <ExternalLink className="w-4 h-4" /> Baixar PDF
-                      </button>
-                      <span className="text-muted-foreground/40">•</span>
-                      <button
-                        type="button"
+                  <div className="w-full space-y-2.5">
+                    {pdfBlobUrl ? (
+                      <div className="rounded-xl overflow-hidden border border-border shadow-inner bg-slate-900/5">
+                        <iframe
+                          src={pdfBlobUrl}
+                          title="Visualização do PDF da Certidão"
+                          className="w-full h-80 sm:h-96 rounded-xl border-0"
+                        />
+                      </div>
+                    ) : null}
+
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <Button
+                        variant="default"
+                        size="sm"
                         onClick={handlePrint}
-                        className="text-xs sm:text-sm text-primary hover:underline flex items-center gap-1.5 cursor-pointer font-semibold"
+                        className="text-xs font-semibold gap-1.5 h-9"
                       >
-                        <Printer className="w-4 h-4" /> Imprimir PDF
-                      </button>
+                        <Printer className="w-3.5 h-3.5" />
+                        Imprimir PDF Original
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={downloadFile}
+                        className="text-xs font-semibold gap-1.5 h-9"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Baixar Arquivo PDF
+                      </Button>
+                      {pdfBlobUrl && (
+                        <a
+                          href={pdfBlobUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 h-9 rounded-md border border-input bg-background hover:bg-accent text-xs font-semibold text-foreground transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                          Abrir PDF em Nova Aba
+                        </a>
+                      )}
                     </div>
                   </div>
                 )}
