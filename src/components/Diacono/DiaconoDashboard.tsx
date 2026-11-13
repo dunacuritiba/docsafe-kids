@@ -691,9 +691,8 @@ export const DiaconoDashboard: React.FC = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => downloadDocumentFile(doc)}
-                            disabled={!doc.arquivoUrl}
                             className="text-xs font-semibold gap-1 h-9 px-2.5"
-                            title={doc.arquivoUrl ? 'Baixar Certidão' : 'Sem anexo'}
+                            title="Baixar Certidão do usuário"
                           >
                             <Download className="w-3.5 h-3.5" />
                             Baixar
@@ -851,9 +850,8 @@ export const DiaconoDashboard: React.FC = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => downloadDocumentFile(doc)}
-                                disabled={!doc.arquivoUrl}
                                 className="text-xs font-semibold gap-1 h-7 px-2"
-                                title={doc.arquivoUrl ? 'Baixar arquivo da certidão' : 'Sem anexo'}
+                                title="Baixar arquivo da certidão"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Baixar

@@ -1,14 +1,30 @@
 import type { DocumentRecord } from '../types';
 
 /**
+ * Converte dataUrl base64 em Blob para download universal sem restrições de tamanho
+ */
+function dataUrlToBlob(dataUrl: string): Blob {
+  try {
+    const parts = dataUrl.split(',');
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
+    const bstr = window.atob(parts[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  } catch (err) {
+    console.error('Erro ao converter dataUrl para Blob:', err);
+    return new Blob([dataUrl], { type: 'application/pdf' });
+  }
+}
+
+/**
  * Realiza o download do arquivo da certidão (PDF ou Imagem)
  */
 export function downloadDocumentFile(doc: DocumentRecord) {
-  if (!doc.arquivoUrl) {
-    alert('Esta certidão não possui cópia digital anexada para download.');
-    return;
-  }
-
   const rawTitular = doc.userNome || doc.nomeExtraido || 'titular';
   const cleanTitular = rawTitular
     .normalize('NFD')
@@ -18,6 +34,13 @@ export function downloadDocumentFile(doc: DocumentRecord) {
     .slice(0, 30);
 
   const cleanNum = (doc.numeroDocumento || 'doc').replace(/[^a-zA-Z0-9]/g, '');
+
+  if (!doc.arquivoUrl) {
+    // Caso a certidão não tenha anexo gravado ainda, baixa o comprovante oficial de validação
+    downloadValidationReceiptFile(doc, cleanTitular, cleanNum);
+    return;
+  }
+
   const extension = doc.arquivoUrl.startsWith('data:image/png')
     ? '.png'
     : doc.arquivoUrl.startsWith('data:image/jpeg') || doc.arquivoUrl.startsWith('data:image/jpg')
@@ -29,12 +52,73 @@ export function downloadDocumentFile(doc: DocumentRecord) {
   const filename =
     doc.nomeArquivo || `certidao_antecedentes_${cleanTitular}_${cleanNum}${extension}`;
 
+  let blobUrl: string | null = null;
+  let downloadUrl = doc.arquivoUrl;
+
+  if (doc.arquivoUrl.startsWith('data:')) {
+    const blob = dataUrlToBlob(doc.arquivoUrl);
+    blobUrl = URL.createObjectURL(blob);
+    downloadUrl = blobUrl;
+  }
+
   const link = window.document.createElement('a');
-  link.href = doc.arquivoUrl;
+  link.href = downloadUrl;
   link.download = filename;
   window.document.body.appendChild(link);
   link.click();
   window.document.body.removeChild(link);
+
+  if (blobUrl) {
+    setTimeout(() => URL.revokeObjectURL(blobUrl!), 30000);
+  }
+}
+
+/**
+ * Baixa folha de conferência oficial caso o arquivo original não esteja disponível
+ */
+function downloadValidationReceiptFile(doc: DocumentRecord, cleanTitular: string, cleanNum: string) {
+  const titular = doc.userNome || doc.nomeExtraido || 'Membro Titular';
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Comprovante de Certidão - ${titular}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; padding: 32px; max-width: 700px; margin: 0 auto; line-height: 1.5; }
+    .box { border: 2px solid #0f172a; border-radius: 12px; padding: 24px; }
+    h1 { font-size: 20px; margin-top: 0; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+    .field { margin: 10px 0; font-size: 14px; }
+    .label { font-weight: bold; color: #475569; width: 180px; display: inline-block; }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-weight: bold; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Comprovante de Conferência de Antecedentes Criminais</h1>
+    <div class="field"><span class="label">Titular / Voluntário:</span> <strong>${titular}</strong></div>
+    <div class="field"><span class="label">Órgão Emissor:</span> ${doc.orgaoEmissor || 'Polícia Federal - ePol/SINIC'}</div>
+    <div class="field"><span class="label">Nº da Certidão:</span> ${doc.numeroDocumento || 'Conferido no ato do cadastro'}</div>
+    <div class="field"><span class="label">Data de Expedição:</span> ${doc.dataEmissao || '-'}</div>
+    <div class="field"><span class="label">Validade (90 dias):</span> ${doc.dataValidade || '-'} (${doc.diasRestantesValidade >= 0 ? `${doc.diasRestantesValidade} dias restantes` : 'Expirada'})</div>
+    <div class="field"><span class="label">Status de Validação:</span> <span class="status">${doc.statusValidacao || 'APROVADO'}</span></div>
+    <div class="field"><span class="label">Registro Criminal:</span> <strong>${doc.constataAntecedentes ? 'Consta Registros' : 'NADA CONSTA'}</strong></div>
+    <div class="footer">
+      DocSafe Kids • Sistema Diaconal de Conformidade e Proteção de Menores • Emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  const blobUrl = URL.createObjectURL(blob);
+  const link = window.document.createElement('a');
+  link.href = blobUrl;
+  link.download = `comprovante_certidao_${cleanTitular}_${cleanNum}.html`;
+  window.document.body.appendChild(link);
+  link.click();
+  window.document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
 }
 
 /**

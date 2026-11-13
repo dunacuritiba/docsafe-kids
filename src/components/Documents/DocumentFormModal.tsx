@@ -166,31 +166,29 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
     if (file.type === 'application/pdf') {
       setScanStatusMessage('Extraindo camada de texto do PDF da certidão...');
-      reader.onload = async () => {
-        try {
-          const buffer = reader.result as ArrayBuffer;
-          // Converte para dataUrl para permitir download e visualização
-          const bytes = new Uint8Array(buffer);
-          let binary = '';
-          for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-          }
-          const base64 = window.btoa(binary);
-          const dataUrl = `data:application/pdf;base64,${base64}`;
-          setArquivoUrl(dataUrl);
+      try {
+        // Converte para dataUrl para download e visualização instantânea
+        const dataUrlPromise = new Promise<string>((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result as string);
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
 
-          // Extrai o texto do PDF com pdfjs
-          const extractedText = await extractTextFromPdf(buffer);
-          processDocumentText(extractedText);
-        } catch (err: any) {
-          console.warn('Erro ao ler PDF:', err);
-          // Fallback manual se falhar
-          setErrorMessage('Não foi possível ler o texto do PDF automaticamente. Você pode digitar os dados.');
-        } finally {
-          setIsScanning(false);
-        }
-      };
-      reader.readAsArrayBuffer(file);
+        const bufferPromise = file.arrayBuffer();
+        const [dataUrl, buffer] = await Promise.all([dataUrlPromise, bufferPromise]);
+
+        setArquivoUrl(dataUrl);
+
+        // Extrai o texto do PDF com pdfjs
+        const extractedText = await extractTextFromPdf(buffer);
+        processDocumentText(extractedText);
+      } catch (err: any) {
+        console.warn('Erro ao ler PDF:', err);
+        setErrorMessage('Não foi possível ler o texto do PDF automaticamente. Você pode digitar os dados.');
+      } finally {
+        setIsScanning(false);
+      }
     } else {
       // É uma imagem (PNG, JPG, etc.)
       setScanStatusMessage('Analisando imagem da certidão com Reconhecimento Óptico (OCR)...');

@@ -497,9 +497,8 @@ export const UserManagementView: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => downloadDocumentFile(userDocs[0])}
-                          disabled={!userDocs[0].arquivoUrl}
                           className="w-full text-xs font-semibold gap-1.5 h-9"
-                          title="Baixar arquivo da certidão deste membro"
+                          title="Baixar certidão deste membro"
                         >
                           <Download className="w-3.5 h-3.5" />
                           Baixar Certidão
@@ -690,13 +689,8 @@ export const UserManagementView: React.FC = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => downloadDocumentFile(userDocs[0])}
-                                disabled={!userDocs[0].arquivoUrl}
                                 className="text-xs font-semibold gap-1 h-8 px-2"
-                                title={
-                                  userDocs[0].arquivoUrl
-                                    ? 'Baixar arquivo da certidão deste membro'
-                                    : 'Sem anexo'
-                                }
+                                title="Baixar certidão deste membro"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Baixar

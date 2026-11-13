@@ -182,18 +182,16 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
               Visualizar
             </Button>
 
-            {document.arquivoUrl && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => downloadDocumentFile(document)}
-                className="text-xs font-semibold gap-1.5 h-9 text-primary hover:text-primary"
-                title="Baixar arquivo da certidão"
-              >
-                <Download className="w-4 h-4" />
-                Baixar
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => downloadDocumentFile(document)}
+              className="text-xs font-semibold gap-1.5 h-9 text-primary hover:text-primary"
+              title="Baixar arquivo da certidão"
+            >
+              <Download className="w-4 h-4" />
+              Baixar
+            </Button>
           </div>
 
           <div className="flex items-center gap-1">

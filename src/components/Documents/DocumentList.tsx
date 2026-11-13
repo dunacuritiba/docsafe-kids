@@ -17,7 +17,7 @@ import { DocumentFormModal } from './DocumentFormModal';
 import { DocumentViewModal } from './DocumentViewModal';
 import { useAuth } from '../../context/AuthContext';
 import { getStoredDocuments, saveDocuments, addLgpdLog } from '../../utils/storage';
-import { supabaseGetDocuments, supabaseDeleteDocument } from '../../services/supabase';
+import { supabaseGetDocuments, supabaseDeleteDocument, supabaseSaveDocument } from '../../services/supabase';
 import { decryptData } from '../../utils/crypto';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,31 +67,43 @@ export const DocumentList: React.FC = () => {
 
       if (allDocs.length === 0) {
         allDocs = getStoredDocuments().filter(d => d.userId === user.id);
-      } else {
-        saveDocuments(allDocs);
       }
 
       const decryptedDocs = await Promise.all(
         allDocs.map(async doc => {
           let decryptedNumero = doc.numeroDocumento;
-          if (doc.encryptedNumeroDocumento) {
-            decryptedNumero = await decryptData(doc.encryptedNumeroDocumento, activeKey);
+          if (doc.encryptedNumeroDocumento && (!decryptedNumero || decryptedNumero === '••••••••')) {
+            const dec = await decryptData(doc.encryptedNumeroDocumento, activeKey);
+            if (dec && !dec.includes('[ERRO')) {
+              decryptedNumero = dec;
+            }
           }
 
           let decryptedArquivo = doc.arquivoUrl;
-          if (doc.encryptedArquivoUrl) {
-            decryptedArquivo = await decryptData(doc.encryptedArquivoUrl, activeKey);
+          if (doc.encryptedArquivoUrl && (!decryptedArquivo || !decryptedArquivo.startsWith('data:'))) {
+            const dec = await decryptData(doc.encryptedArquivoUrl, activeKey);
+            if (dec && !dec.includes('[ERRO')) {
+              decryptedArquivo = dec;
+            }
           }
 
-          return {
+          const resolved: DocumentRecord = {
             ...doc,
-            numeroDocumento: decryptedNumero,
-            arquivoUrl: decryptedArquivo,
+            numeroDocumento: decryptedNumero || doc.numeroDocumento,
+            arquivoUrl: decryptedArquivo || doc.arquivoUrl,
           };
+
+          // Sincroniza com Supabase se decifrou arquivo que estava ausente
+          if (resolved.arquivoUrl && (!doc.arquivoUrl || !doc.numeroDocumento)) {
+            supabaseSaveDocument(resolved).catch(e => console.warn('Sync arquivo_url:', e));
+          }
+
+          return resolved;
         })
       );
 
       setDocuments(decryptedDocs);
+      saveDocuments(decryptedDocs);
     } catch (err) {
       console.error('Erro ao decifrar certidões:', err);
     } finally {

@@ -532,30 +532,26 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
             >
               Editar Certidão
             </Button>
-            {document.arquivoUrl && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={downloadFile}
-                  className="text-xs sm:text-sm font-semibold h-10 sm:h-9 gap-1.5 flex-1 sm:flex-none"
-                  title="Baixar arquivo da certidão"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Baixar
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePrint}
-                  className="text-xs sm:text-sm font-semibold h-10 sm:h-9 gap-1.5 flex-1 sm:flex-none text-primary"
-                  title="Imprimir certidão"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  Imprimir
-                </Button>
-              </>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={downloadFile}
+              className="text-xs sm:text-sm font-semibold h-10 sm:h-9 gap-1.5 flex-1 sm:flex-none"
+              title="Baixar arquivo da certidão"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Baixar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrint}
+              className="text-xs sm:text-sm font-semibold h-10 sm:h-9 gap-1.5 flex-1 sm:flex-none text-primary"
+              title="Imprimir certidão"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Imprimir
+            </Button>
           </div>
           <Button
             variant="default"
