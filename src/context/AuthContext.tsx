@@ -42,6 +42,15 @@ interface RegisterData {
   lgpdConsent: boolean;
 }
 
+export interface UpdateProfileParams {
+  nome: string;
+  telefone: string;
+  cpf: string;
+  dataNascimento: string;
+  rede: RedeType;
+  fotoUrl?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   activeKey: CryptoKey | null;
@@ -50,6 +59,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfileFoto: (fotoUrl: string) => Promise<void>;
+  updateUserProfile: (params: UpdateProfileParams) => Promise<{ success: boolean; error?: string }>;
   updateBirthDate: (dataNascimento: string) => Promise<boolean>;
   toggleRole: (newRole: UserRole) => Promise<boolean>;
   changeUserRole: (targetUserId: string, newRole: UserRole) => Promise<boolean>;
@@ -369,6 +379,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updatedUser);
 
     await supabaseSaveUser(updatedUser);
+    addLgpdLog(user.id, 'ACESSO_DADOS', 'Foto de perfil do usuário atualizada com sucesso.');
+  };
+
+  const updateUserProfile = async (
+    params: UpdateProfileParams
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!user || !activeKey) {
+      return { success: false, error: 'Usuário não autenticado ou chave indisponível.' };
+    }
+
+    setIsLoading(true);
+    try {
+      const cleanNome = params.nome.trim();
+      const cleanTelefone = params.telefone.trim();
+      const cleanCpf = params.cpf.trim();
+      const cleanNasc = params.dataNascimento.trim();
+
+      // Criptografa novamente dados sensíveis atualizados usando AES-GCM
+      const encryptedTelefone = await encryptData(cleanTelefone, activeKey);
+      const encryptedCpf = await encryptData(cleanCpf, activeKey);
+
+      const updatedUser: User = {
+        ...user,
+        nome: cleanNome,
+        telefone: cleanTelefone,
+        cpf: cleanCpf,
+        dataNascimento: cleanNasc,
+        rede: params.rede,
+        fotoUrl: params.fotoUrl,
+        encryptedTelefone,
+        encryptedCpf,
+      };
+
+      // 1. Salva no Supabase (collection usuarios-kids)
+      const remoteRes = await supabaseSaveUser(updatedUser);
+      if (!remoteRes.success) {
+        console.warn('Aviso ao sincronizar perfil no Supabase:', remoteRes.error);
+      }
+
+      // 2. Salva localmente
+      const users = getStoredUsers();
+      const updatedUsers = users.map(u => (u.id === user.id ? updatedUser : u));
+      saveUsers(updatedUsers);
+      saveSessionUser(updatedUser);
+
+      // 3. Atualiza estado da sessão
+      setUser(updatedUser);
+
+      addLgpdLog(
+        user.id,
+        'ACESSO_DADOS',
+        `Perfil e dados cadastrais atualizados com criptografia AES-256 (Rede: ${params.rede}).`
+      );
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('Erro ao atualizar perfil do usuário:', err);
+      return { success: false, error: err.message || 'Falha ao criptografar e atualizar perfil.' };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // LGPD Art. 18, V - Portabilidade de Dados (Exportação)
@@ -438,6 +509,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         updateProfileFoto,
+        updateUserProfile,
         updateBirthDate,
         toggleRole,
         changeUserRole,

@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface NavbarProps {
-  currentTab: 'DOCUMENTS' | 'LGPD' | 'DIACONO';
-  onTabChange: (tab: 'DOCUMENTS' | 'LGPD' | 'DIACONO') => void;
+  currentTab: 'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'PROFILE';
+  onTabChange: (tab: 'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'PROFILE') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
@@ -27,7 +27,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-3">
             {/* Logo & Marca */}
-            <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+            <div
+              onClick={() => onTabChange('DOCUMENTS')}
+              className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 cursor-pointer"
+            >
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-xs">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
               </div>
@@ -73,6 +76,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               >
                 <FileText className="w-3.5 h-3.5 flex-shrink-0" />
                 Minhas Certidões
+              </Button>
+
+              <Button
+                variant={currentTab === 'PROFILE' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => onTabChange('PROFILE')}
+                className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
+                  currentTab === 'PROFILE'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <UserIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                Meu Perfil
               </Button>
 
               <Button
@@ -133,8 +150,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                 </span>
               )}
 
-              {/* Avatar & Nome */}
-              <div className="flex items-center gap-2 pl-1 sm:pl-2 sm:border-l sm:border-border">
+              {/* Avatar & Nome (Clicável para ir ao perfil) */}
+              <button
+                type="button"
+                onClick={() => onTabChange('PROFILE')}
+                className={`flex items-center gap-2 pl-1 sm:pl-2 sm:border-l sm:border-border p-1 rounded-xl transition-colors text-left cursor-pointer ${
+                  currentTab === 'PROFILE' ? 'bg-primary/10' : 'hover:bg-muted/60'
+                }`}
+                title="Clique para editar seus dados e trocar foto de perfil"
+              >
                 <Avatar size="sm" className="border border-border size-9">
                   {user.fotoUrl && <AvatarImage src={user.fotoUrl} alt={user.nome} />}
                   <AvatarFallback className="bg-muted text-foreground text-xs font-bold">
@@ -146,9 +170,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                   <p className="text-xs font-bold text-foreground leading-tight truncate max-w-[120px]">
                     {user.nome.split(' ')[0]}
                   </p>
-                  <p className="text-[11px] text-muted-foreground truncate max-w-[120px]">{user.email}</p>
+                  <p className="text-[11px] text-muted-foreground truncate max-w-[120px]">Editar Perfil</p>
                 </div>
-              </div>
+              </button>
 
               {/* Botão Sair */}
               <Button
@@ -166,11 +190,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
       </header>
 
       {/* Bottom Navigation Bar Exclusivo para Mobile (md:hidden) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border px-3 py-1.5 shadow-lg flex items-center justify-around">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border px-2 py-1.5 shadow-lg flex items-center justify-around">
         <button
           type="button"
           onClick={() => onTabChange('DOCUMENTS')}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+          className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-xl transition-all ${
             currentTab === 'DOCUMENTS'
               ? 'text-primary font-bold'
               : 'text-muted-foreground hover:text-foreground'
@@ -179,14 +203,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           <div className={`p-1 rounded-lg ${currentTab === 'DOCUMENTS' ? 'bg-primary/10' : ''}`}>
             <FileText className="w-5 h-5" />
           </div>
-          <span className="text-xs mt-0.5">Certidões</span>
+          <span className="text-[11px] mt-0.5 font-medium">Certidões</span>
         </button>
 
         {isDiacono && (
           <button
             type="button"
             onClick={() => onTabChange('DIACONO')}
-            className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+            className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-xl transition-all ${
               currentTab === 'DIACONO'
                 ? 'text-purple-600 font-bold'
                 : 'text-muted-foreground hover:text-foreground'
@@ -195,14 +219,29 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             <div className={`p-1 rounded-lg ${currentTab === 'DIACONO' ? 'bg-purple-100 dark:bg-purple-950/40' : ''}`}>
               <ShieldAlert className="w-5 h-5 text-purple-600" />
             </div>
-            <span className="text-xs mt-0.5">Diácono</span>
+            <span className="text-[11px] mt-0.5 font-medium">Diácono</span>
           </button>
         )}
 
         <button
           type="button"
+          onClick={() => onTabChange('PROFILE')}
+          className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-xl transition-all ${
+            currentTab === 'PROFILE'
+              ? 'text-blue-600 font-bold'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <div className={`p-1 rounded-lg ${currentTab === 'PROFILE' ? 'bg-blue-100 dark:bg-blue-950/40' : ''}`}>
+            <UserIcon className="w-5 h-5 text-blue-600" />
+          </div>
+          <span className="text-[11px] mt-0.5 font-medium">Perfil</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => onTabChange('LGPD')}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+          className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-xl transition-all ${
             currentTab === 'LGPD'
               ? 'text-emerald-600 font-bold'
               : 'text-muted-foreground hover:text-foreground'
@@ -211,7 +250,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           <div className={`p-1 rounded-lg ${currentTab === 'LGPD' ? 'bg-emerald-100 dark:bg-emerald-950/40' : ''}`}>
             <Lock className="w-5 h-5 text-emerald-600" />
           </div>
-          <span className="text-xs mt-0.5">LGPD</span>
+          <span className="text-[11px] mt-0.5 font-medium">LGPD</span>
         </button>
       </nav>
     </>

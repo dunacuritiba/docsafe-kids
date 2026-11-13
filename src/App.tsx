@@ -6,6 +6,7 @@ import { Navbar } from './components/Navbar';
 import { DocumentList } from './components/Documents/DocumentList';
 import { DiaconoDashboard } from './components/Diacono/DiaconoDashboard';
 import { LgpdPrivacyCenter } from './components/LgpdPrivacyCenter';
+import { UserProfileEdit } from './components/Profile/UserProfileEdit';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Lock, CheckCircle2, FileText, Camera } from 'lucide-react';
@@ -13,7 +14,7 @@ import { ShieldCheck, Lock, CheckCircle2, FileText, Camera } from 'lucide-react'
 export const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [authView, setAuthView] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
-  const [currentTab, setCurrentTab] = useState<'DOCUMENTS' | 'LGPD' | 'DIACONO'>('DOCUMENTS');
+  const [currentTab, setCurrentTab] = useState<'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'PROFILE'>('DOCUMENTS');
 
   // Se o usuário for Diácono, abre diretamente a visão diaconal para supervisão
   useEffect(() => {
@@ -152,6 +153,8 @@ export const AppContent: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-8">
         {currentTab === 'DIACONO' && user.role === 'DIACONO' ? (
           <DiaconoDashboard />
+        ) : currentTab === 'PROFILE' ? (
+          <UserProfileEdit />
         ) : currentTab === 'DOCUMENTS' ? (
           <DocumentList />
         ) : (
