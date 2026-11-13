@@ -90,11 +90,23 @@ export const CameraModal: React.FC<CameraModalProps> = ({
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    const rawW = video.videoWidth || 640;
+    const rawH = video.videoHeight || 480;
+
+    // Redimensionar para tamanho otimizado de avatar (máx 360x360)
+    const maxDim = 360;
+    const ratio = Math.min(maxDim / rawW, maxDim / rawH, 1);
+    const targetW = Math.round(rawW * ratio);
+    const targetH = Math.round(rawH * ratio);
+
+    canvas.width = targetW;
+    canvas.height = targetH;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     // Se estiver na câmera frontal, espelha horizontalmente para parecer natural
     if (facingMode === 'user') {
@@ -102,8 +114,8 @@ export const CameraModal: React.FC<CameraModalProps> = ({
       ctx.scale(-1, 1);
     }
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    ctx.drawImage(video, 0, 0, targetW, targetH);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
     setCapturedImage(dataUrl);
   };
 

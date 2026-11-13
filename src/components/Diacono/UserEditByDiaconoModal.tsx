@@ -22,6 +22,7 @@ import { REDES_DISPONIVEIS, isUserAdmin } from '../../types';
 import { supabaseUpdateUserByDiacono } from '../../services/supabase';
 import { getStoredUsers, saveUsers, addLgpdLog } from '../../utils/storage';
 import { useAuth } from '../../context/AuthContext';
+import { compressProfileImage } from '../../utils/imageCompressor';
 import { CameraModal } from '../CameraModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,19 +78,17 @@ export const UserEditByDiaconoModal: React.FC<UserEditByDiaconoModalProps> = ({
   const latestDoc = userDocs[0]; // mais recente
   const isDocValid = latestDoc && latestDoc.statusValidacao === 'APROVADO' && latestDoc.diasRestantesValidade >= 0;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMessage('A imagem deve ter no máximo 5MB.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFotoUrl(reader.result as string);
+      try {
+        const compressed = await compressProfileImage(file, 320, 320, 0.75);
+        setFotoUrl(compressed);
         setErrorMessage(null);
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.warn('Erro ao processar imagem:', err);
+        setErrorMessage('Não foi possível processar a imagem selecionada.');
+      }
     }
   };
 
@@ -485,8 +484,9 @@ export const UserEditByDiaconoModal: React.FC<UserEditByDiaconoModalProps> = ({
       <CameraModal
         isOpen={isCameraOpen}
         onClose={() => setIsCameraOpen(false)}
-        onCapture={imageDataUrl => {
-          setFotoUrl(imageDataUrl);
+        onCapture={async (imageDataUrl) => {
+          const compressed = await compressProfileImage(imageDataUrl, 320, 320, 0.75);
+          setFotoUrl(compressed);
           setIsCameraOpen(false);
         }}
         title="Fotografar Identificação do Membro"

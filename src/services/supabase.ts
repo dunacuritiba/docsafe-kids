@@ -173,7 +173,10 @@ export async function supabaseGetUserByEmail(email: string): Promise<User | null
 
 export async function supabaseGetAllUsers(): Promise<User[]> {
   try {
-    const { data, error } = await supabase.from(USERS_TABLE).select('*').order('nome');
+    const { data, error } = await supabase
+      .from(USERS_TABLE)
+      .select('id, nome, email, data_nascimento, role, rede, foto_url, created_at, encrypted_telefone, encrypted_cpf, lgpd_consent, lgpd_consent_date')
+      .order('nome');
     if (error || !data) return [];
 
     return data.map((d: any) => ({
@@ -182,8 +185,8 @@ export async function supabaseGetAllUsers(): Promise<User[]> {
       email: d.email,
       dataNascimento: d.data_nascimento || '',
       role: (d.role as UserRole) || 'USUARIO',
-      passwordHash: d.password_hash,
-      passwordSalt: d.password_salt,
+      passwordHash: '',
+      passwordSalt: '',
       telefone: '',
       cpf: '',
       encryptedTelefone: d.encrypted_telefone,

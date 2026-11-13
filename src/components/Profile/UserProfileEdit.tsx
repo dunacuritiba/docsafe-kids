@@ -20,6 +20,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { REDES_DISPONIVEIS, isUserAdmin, type RedeType, type UserRole } from '../../types';
 import { maskPhone, maskCPF, validateCPF } from '../../utils/masks';
+import { compressProfileImage } from '../../utils/imageCompressor';
 import { CameraModal } from '../CameraModal';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,19 +65,17 @@ export const UserProfileEdit: React.FC<UserProfileEditProps> = ({ onSavedSuccess
     setCpf(maskCPF(e.target.value));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMessage('A imagem deve ter no máximo 5MB.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFotoUrl(reader.result as string);
+      try {
+        const compressed = await compressProfileImage(file, 320, 320, 0.75);
+        setFotoUrl(compressed);
         setErrorMessage(null);
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.warn('Erro ao processar imagem:', err);
+        setErrorMessage('Não foi possível processar a imagem selecionada.');
+      }
     }
   };
 
@@ -482,8 +481,9 @@ export const UserProfileEdit: React.FC<UserProfileEditProps> = ({ onSavedSuccess
       <CameraModal
         isOpen={isCameraOpen}
         onClose={() => setIsCameraOpen(false)}
-        onCapture={imageDataUrl => {
-          setFotoUrl(imageDataUrl);
+        onCapture={async (imageDataUrl) => {
+          const compressed = await compressProfileImage(imageDataUrl, 320, 320, 0.75);
+          setFotoUrl(compressed);
           setIsCameraOpen(false);
         }}
         title="Fotografar Nova Foto de Perfil"
