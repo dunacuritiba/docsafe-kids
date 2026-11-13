@@ -64,7 +64,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
       case 'USERS':
         return { label: 'Gestão de Usuários', icon: Users, color: 'text-emerald-600' };
       case 'DOCUMENTS':
-        return { label: 'Minhas Certidões', icon: FileText, color: 'text-primary' };
+        return {
+          label: isDiacono ? 'Lista de Certidões' : 'Minhas Certidões',
+          icon: FileText,
+          color: 'text-primary',
+        };
       case 'PROFILE':
         return { label: 'Meu Perfil', icon: UserIcon, color: 'text-blue-600' };
       case 'LGPD':
@@ -228,9 +232,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                           <FileText className="w-4 h-4 text-primary" />
                         </div>
                         <div>
-                          <span className="font-bold block">Minhas Certidões</span>
+                          <span className="font-bold block">
+                            {isDiacono ? 'Lista de Certidões (Todos)' : 'Minhas Certidões'}
+                          </span>
                           <span className="text-[11px] text-muted-foreground block font-normal">
-                            Consultar e registrar antecedentes
+                            {isDiacono
+                              ? 'Ver certidões de todos os membros e baixar'
+                              : 'Consultar e registrar antecedentes'}
                           </span>
                         </div>
                       </div>

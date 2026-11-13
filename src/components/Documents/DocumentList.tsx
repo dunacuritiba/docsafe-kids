@@ -10,14 +10,21 @@ import {
   AlertTriangle,
   Save,
   Check,
+  ShieldCheck,
 } from 'lucide-react';
 import type { DocumentRecord } from '../../types';
+import { REDES_DISPONIVEIS, isUserAdmin } from '../../types';
 import { DocumentCard } from './DocumentCard';
 import { DocumentFormModal } from './DocumentFormModal';
 import { DocumentViewModal } from './DocumentViewModal';
 import { useAuth } from '../../context/AuthContext';
 import { getStoredDocuments, saveDocuments, addLgpdLog } from '../../utils/storage';
-import { supabaseGetDocuments, supabaseDeleteDocument, supabaseSaveDocument } from '../../services/supabase';
+import {
+  supabaseGetDocuments,
+  supabaseGetAllDocumentsForDiacono,
+  supabaseDeleteDocument,
+  supabaseSaveDocument,
+} from '../../services/supabase';
 import { decryptData } from '../../utils/crypto';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,11 +33,15 @@ import { Badge } from '@/components/ui/badge';
 
 export const DocumentList: React.FC = () => {
   const { user, activeKey, updateBirthDate } = useAuth();
+  const isAdmin = isUserAdmin(user?.email);
+  const isDiacono = user?.role === 'DIACONO' || isAdmin;
 
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'TODOS' | 'APROVADOS' | 'DIVERGENTES' | 'EXPIRADOS'>('TODOS');
+  const [scopeFilter, setScopeFilter] = useState<'TODAS' | 'MINHAS'>('TODAS');
+  const [redeFilter, setRedeFilter] = useState<string>('TODAS');
   const [hideSensitive, setHideSensitive] = useState(true);
 
   // Estado para cadastro/atualização de Data de Nascimento se ausente
@@ -57,33 +68,46 @@ export const DocumentList: React.FC = () => {
   const [selectedDocument, setSelectedDocument] = useState<DocumentRecord | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  // Carrega e decifra certidões do usuário
+  // Carrega certidões: para Diácono carrega de todos os usuários; para Usuário comum carrega apenas as suas
   const loadDocuments = async () => {
-    if (!user || !activeKey) return;
+    if (!user) return;
     setIsLoading(true);
 
     try {
-      let allDocs = await supabaseGetDocuments(user.id);
+      let allDocs: DocumentRecord[] = [];
 
-      if (allDocs.length === 0) {
-        allDocs = getStoredDocuments().filter(d => d.userId === user.id);
+      if (isDiacono) {
+        allDocs = await supabaseGetAllDocumentsForDiacono();
+        if (allDocs.length === 0) {
+          allDocs = getStoredDocuments();
+        }
+      } else {
+        allDocs = await supabaseGetDocuments(user.id);
+        if (allDocs.length === 0) {
+          allDocs = getStoredDocuments().filter(d => d.userId === user.id);
+        }
       }
 
       const decryptedDocs = await Promise.all(
         allDocs.map(async doc => {
           let decryptedNumero = doc.numeroDocumento;
+          // Decifra número se for do próprio usuário ou se possuir a chave de sessão
           if (doc.encryptedNumeroDocumento && (!decryptedNumero || decryptedNumero === '••••••••')) {
-            const dec = await decryptData(doc.encryptedNumeroDocumento, activeKey);
-            if (dec && !dec.includes('[ERRO')) {
-              decryptedNumero = dec;
+            if (activeKey && doc.userId === user.id) {
+              const dec = await decryptData(doc.encryptedNumeroDocumento, activeKey);
+              if (dec && !dec.includes('[ERRO')) {
+                decryptedNumero = dec;
+              }
             }
           }
 
           let decryptedArquivo = doc.arquivoUrl;
           if (doc.encryptedArquivoUrl && (!decryptedArquivo || !decryptedArquivo.startsWith('data:'))) {
-            const dec = await decryptData(doc.encryptedArquivoUrl, activeKey);
-            if (dec && !dec.includes('[ERRO')) {
-              decryptedArquivo = dec;
+            if (activeKey && doc.userId === user.id) {
+              const dec = await decryptData(doc.encryptedArquivoUrl, activeKey);
+              if (dec && !dec.includes('[ERRO')) {
+                decryptedArquivo = dec;
+              }
             }
           }
 
@@ -93,8 +117,8 @@ export const DocumentList: React.FC = () => {
             arquivoUrl: decryptedArquivo || doc.arquivoUrl,
           };
 
-          // Sincroniza com Supabase se decifrou arquivo que estava ausente
-          if (resolved.arquivoUrl && (!doc.arquivoUrl || !doc.numeroDocumento)) {
+          // Sincroniza com Supabase se decifrou arquivo do próprio usuário que estava ausente
+          if (doc.userId === user.id && resolved.arquivoUrl && (!doc.arquivoUrl || !doc.numeroDocumento)) {
             supabaseSaveDocument(resolved).catch(e => console.warn('Sync arquivo_url:', e));
           }
 
@@ -103,9 +127,11 @@ export const DocumentList: React.FC = () => {
       );
 
       setDocuments(decryptedDocs);
-      saveDocuments(decryptedDocs);
+      if (!isDiacono) {
+        saveDocuments(decryptedDocs);
+      }
     } catch (err) {
-      console.error('Erro ao decifrar certidões:', err);
+      console.error('Erro ao carregar certidões:', err);
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +139,7 @@ export const DocumentList: React.FC = () => {
 
   useEffect(() => {
     loadDocuments();
-  }, [user, activeKey]);
+  }, [user, activeKey, isDiacono]);
 
   // Exclusão com log LGPD e sincronização Supabase
   const confirmDelete = async () => {
@@ -137,12 +163,26 @@ export const DocumentList: React.FC = () => {
 
   // Filtragem
   const filteredDocs = documents.filter(doc => {
-    const matchesSearch =
-      doc.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.numeroDocumento.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (doc.nomeExtraido && doc.nomeExtraido.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Filtro de Escopo para Diácono (Todas vs Minhas)
+    if (isDiacono && scopeFilter === 'MINHAS' && doc.userId !== user?.id) {
+      return false;
+    }
 
-    if (!matchesSearch) return false;
+    // Filtro por Rede para Diácono
+    if (isDiacono && redeFilter !== 'TODAS' && doc.userRede !== redeFilter) {
+      return false;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    if (term) {
+      const matchesSearch =
+        doc.titulo.toLowerCase().includes(term) ||
+        doc.numeroDocumento.toLowerCase().includes(term) ||
+        (doc.nomeExtraido && doc.nomeExtraido.toLowerCase().includes(term)) ||
+        (doc.userNome && doc.userNome.toLowerCase().includes(term)) ||
+        (doc.userEmail && doc.userEmail.toLowerCase().includes(term));
+      if (!matchesSearch) return false;
+    }
 
     if (statusFilter === 'APROVADOS') return doc.statusValidacao === 'APROVADO';
     if (statusFilter === 'DIVERGENTES') return doc.statusValidacao === 'DIVERGENTE';
@@ -205,19 +245,30 @@ export const DocumentList: React.FC = () => {
         </Card>
       )}
 
-      {/* Banner Informativo sobre a Regra de 90 Dias e Validação com shadcn Card */}
+      {/* Banner Informativo sobre a Regra de 90 Dias e Validação */}
       <Card className="p-4 sm:p-7 border-border shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
           <div className="space-y-2">
             <Badge variant="secondary" className="gap-1.5 py-1 px-3 text-xs font-semibold">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
-              Validade Legal de 90 Dias • Polícia Federal (SINIC)
+              {isDiacono ? (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                  Visão Diaconal • Todas as Certidões do Sistema
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                  Validade Legal de 90 Dias • Polícia Federal (SINIC)
+                </>
+              )}
             </Badge>
             <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight">
-              Certidões de Antecedentes Criminais
+              {isDiacono ? 'Certidões dos Membros & Voluntários' : 'Minhas Certidões de Antecedentes Criminais'}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-              O sistema verifica automaticamente se o <strong>Nome</strong> e a <strong>Data de Nascimento</strong> contidos na certidão coincidem com o seu cadastro de usuário e monitora a expiração de 90 dias a partir da data de expedição do documento.
+              {isDiacono
+                ? 'Como Diácono, você tem acesso centralizado para consultar, verificar a validade de 90 dias, imprimir e baixar os arquivos originais de certidões enviados por todos os voluntários.'
+                : 'O sistema verifica automaticamente se o Nome e a Data de Nascimento contidos na certidão coincidem com o seu cadastro de usuário e monitora a expiração de 90 dias a partir da data de expedição do documento.'}
             </CardDescription>
           </div>
 
@@ -260,54 +311,109 @@ export const DocumentList: React.FC = () => {
       </Card>
 
       {/* Barra de Filtros e Busca */}
-      <Card className="p-3 sm:p-4 border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Campo de Busca com shadcn Input */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <Input
-            type="text"
-            placeholder="Buscar por número da certidão ou nome..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
-          />
+      <Card className="p-3 sm:p-4 border-border shadow-xs space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Campo de Busca */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              type="text"
+              placeholder={
+                isDiacono
+                  ? 'Buscar por nome do membro, e-mail ou número da certidão...'
+                  : 'Buscar por número da certidão ou nome...'
+              }
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-9 h-11 sm:h-10 text-base sm:text-sm"
+            />
+          </div>
+
+          {/* Filtro por Rede se Diácono */}
+          {isDiacono && (
+            <div className="w-full md:w-56 shrink-0">
+              <select
+                aria-label="Filtrar por rede"
+                value={redeFilter}
+                onChange={e => setRedeFilter(e.target.value)}
+                className="w-full h-11 sm:h-10 px-3 rounded-md border border-input bg-background text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="TODAS">Todas as Redes ({documents.length})</option>
+                {REDES_DISPONIVEIS.map(r => (
+                  <option key={r.id} value={r.id}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 justify-between">
-          {/* Filtro de Status com overflow suave */}
-          <div className="flex rounded-xl bg-muted/60 p-1 text-xs font-medium border border-border/40 overflow-x-auto max-w-full">
-            <Button
-              variant={statusFilter === 'TODOS' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setStatusFilter('TODOS')}
-              className="text-xs h-8 px-2.5 sm:px-3 font-semibold"
-            >
-              Todas
-            </Button>
-            <Button
-              variant={statusFilter === 'APROVADOS' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setStatusFilter('APROVADOS')}
-              className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${statusFilter === 'APROVADOS' ? 'bg-emerald-600 text-white' : 'text-emerald-700'}`}
-            >
-              Aprovadas
-            </Button>
-            <Button
-              variant={statusFilter === 'DIVERGENTES' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setStatusFilter('DIVERGENTES')}
-              className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${statusFilter === 'DIVERGENTES' ? 'bg-rose-600 text-white' : 'text-rose-700'}`}
-            >
-              Divergentes
-            </Button>
-            <Button
-              variant={statusFilter === 'EXPIRADOS' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setStatusFilter('EXPIRADOS')}
-              className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${statusFilter === 'EXPIRADOS' ? 'bg-amber-600 text-white' : 'text-amber-700'}`}
-            >
-              Expiradas
-            </Button>
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/60">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Alternador de Escopo (Diácono apenas) */}
+            {isDiacono && (
+              <div className="flex rounded-xl bg-muted/60 p-1 text-xs font-medium border border-border/40">
+                <Button
+                  variant={scopeFilter === 'TODAS' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setScopeFilter('TODAS')}
+                  className="text-xs h-8 px-2.5 sm:px-3 font-semibold"
+                >
+                  Todas ({documents.length})
+                </Button>
+                <Button
+                  variant={scopeFilter === 'MINHAS' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setScopeFilter('MINHAS')}
+                  className="text-xs h-8 px-2.5 sm:px-3 font-semibold"
+                >
+                  Minhas ({documents.filter(d => d.userId === user?.id).length})
+                </Button>
+              </div>
+            )}
+
+            {/* Filtro de Status com overflow suave */}
+            <div className="flex rounded-xl bg-muted/60 p-1 text-xs font-medium border border-border/40 overflow-x-auto max-w-full">
+              <Button
+                variant={statusFilter === 'TODOS' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setStatusFilter('TODOS')}
+                className="text-xs h-8 px-2.5 sm:px-3 font-semibold"
+              >
+                Todas
+              </Button>
+              <Button
+                variant={statusFilter === 'APROVADOS' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setStatusFilter('APROVADOS')}
+                className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${
+                  statusFilter === 'APROVADOS' ? 'bg-emerald-600 text-white' : 'text-emerald-700'
+                }`}
+              >
+                Aprovadas
+              </Button>
+              <Button
+                variant={statusFilter === 'DIVERGENTES' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setStatusFilter('DIVERGENTES')}
+                className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${
+                  statusFilter === 'DIVERGENTES' ? 'bg-rose-600 text-white' : 'text-rose-700'
+                }`}
+              >
+                Divergentes
+              </Button>
+              <Button
+                variant={statusFilter === 'EXPIRADOS' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setStatusFilter('EXPIRADOS')}
+                className={`text-xs h-8 px-2.5 sm:px-3 font-semibold ${
+                  statusFilter === 'EXPIRADOS' ? 'bg-amber-600 text-white' : 'text-amber-700'
+                }`}
+              >
+                Expiradas
+              </Button>
+            </div>
           </div>
 
           {/* Toggle de Privacidade */}
@@ -315,7 +421,7 @@ export const DocumentList: React.FC = () => {
             variant={hideSensitive ? 'outline' : 'ghost'}
             size="sm"
             onClick={() => setHideSensitive(!hideSensitive)}
-            className={`text-xs font-semibold gap-1.5 h-10 sm:h-9 px-3 ${
+            className={`text-xs font-semibold gap-1.5 h-9 px-3 ${
               hideSensitive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : ''
             }`}
           >

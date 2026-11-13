@@ -14,10 +14,12 @@ import {
   Printer,
 } from 'lucide-react';
 import type { DocumentRecord } from '../../types';
+import { REDES_DISPONIVEIS } from '../../types';
 import { downloadDocumentFile, printDocument } from '../../utils/documentExport';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface DocumentCardProps {
   document: DocumentRecord;
@@ -37,6 +39,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   const isExpired = document.diasRestantesValidade < 0;
   const isExpiringSoon = !isExpired && document.diasRestantesValidade <= 15;
   const isAprovado = document.statusValidacao === 'APROVADO';
+  const redeMeta = REDES_DISPONIVEIS.find(r => r.id === document.userRede);
 
   const displayNumero =
     hideSensitive && document.isSensivel
@@ -116,6 +119,39 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       {/* Body */}
       <CardContent className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
+          {/* Cabeçalho do Titular (visão de todos os usuários para Diáconos) */}
+          {document.userNome && (
+            <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-border/60">
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <Avatar className="size-8 rounded-xl border border-border shadow-2xs shrink-0">
+                  {document.userFotoUrl && (
+                    <AvatarImage src={document.userFotoUrl} alt={document.userNome} className="object-cover" />
+                  )}
+                  <AvatarFallback className="text-xs font-black bg-primary/10 text-primary">
+                    {(document.userNome || 'U').charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="truncate">
+                  <span className="font-bold text-xs sm:text-sm text-foreground block truncate">
+                    {document.userNome}
+                  </span>
+                  {document.userEmail && (
+                    <span className="text-[11px] text-muted-foreground block truncate">
+                      {document.userEmail}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {redeMeta && (
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${redeMeta.bg} ${redeMeta.color} ${redeMeta.border}`}
+                >
+                  {redeMeta.label}
+                </span>
+              )}
+            </div>
+          )}
+
           <h4 className="font-bold text-foreground text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-primary transition-colors">
             {document.titulo}
           </h4>
@@ -124,7 +160,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
           <div className="mt-2.5 p-2.5 bg-muted/40 rounded-xl border border-border/60 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-mono text-foreground">
               <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="font-semibold">{displayNumero}</span>
+              <span className="font-semibold">{displayNumero || '••••••••'}</span>
             </div>
             <Badge variant="outline" className="text-xs font-semibold py-0.5 px-2">
               Protegido
@@ -171,40 +207,42 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
 
         {/* Footer com botões shadcn */}
         <div className="pt-4 mt-3 border-t border-border/60 flex items-center justify-between gap-1.5 flex-wrap">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onView(document)}
               className="text-xs font-semibold gap-1.5 h-9"
+              title="Visualizar certidão e cruzamento de dados"
             >
               <Eye className="w-4 h-4" />
               Visualizar
             </Button>
 
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => downloadDocumentFile(document)}
-              className="text-xs font-semibold gap-1.5 h-9 text-primary hover:text-primary"
-              title="Baixar arquivo da certidão"
+              className="text-xs font-semibold gap-1.5 h-9 font-bold"
+              title="Baixar arquivo da certidão (PDF ou Imagem)"
             >
               <Download className="w-4 h-4" />
               Baixar
             </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => printDocument(document)}
+              className="text-xs font-semibold gap-1.5 h-9 text-primary border-primary/30 hover:bg-primary/10"
+              title="Imprimir documento original do usuário"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimir
+            </Button>
           </div>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => printDocument(document)}
-              className="text-muted-foreground hover:text-foreground h-9 w-9"
-              title="Imprimir certidão"
-            >
-              <Printer className="w-4 h-4" />
-            </Button>
-
             <Button
               variant="ghost"
               size="icon"
