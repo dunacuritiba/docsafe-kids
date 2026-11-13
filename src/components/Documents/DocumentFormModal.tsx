@@ -146,25 +146,25 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
     setDivergencias(parsed.divergencias);
   };
 
-  // Análise automática ao subir PDF ou Imagem
+  // Análise automática ao subir PDF ou Imagem/Printscreen (JPG, JPEG, PNG, WEBP)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 15 * 1024 * 1024) {
-      setErrorMessage('O documento deve ter no máximo 15MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      setErrorMessage('O documento deve ter no máximo 20MB.');
       return;
     }
 
     setNomeArquivo(file.name);
     setTamanhoArquivo(file.size);
-    setTipoArquivo(file.type);
+    setTipoArquivo(file.type || 'image/jpeg');
     setIsScanning(true);
     setErrorMessage(null);
 
-    const reader = new FileReader();
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
-    if (file.type === 'application/pdf') {
+    if (isPdf) {
       setScanStatusMessage('Extraindo camada de texto do PDF da certidão...');
       try {
         // Converte para dataUrl para download e visualização instantânea
@@ -180,7 +180,7 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
 
         setArquivoUrl(dataUrl);
 
-        // Extrai o texto do PDF com pdfjs
+        // Extrai o texto do PDF com pdfjs (com fallback automático para OCR se for PDF digitalizado/foto)
         const extractedText = await extractTextFromPdf(buffer);
         processDocumentText(extractedText);
       } catch (err: any) {
@@ -190,20 +190,27 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
         setIsScanning(false);
       }
     } else {
-      // É uma imagem (PNG, JPG, etc.)
-      setScanStatusMessage('Analisando imagem da certidão com Reconhecimento Óptico (OCR)...');
+      // É uma foto ou printscreen de tela (JPG, JPEG, PNG, etc.)
+      setScanStatusMessage('Carregando foto/printscreen da certidão...');
+      const reader = new FileReader();
       reader.onload = async () => {
         const dataUrl = reader.result as string;
         setArquivoUrl(dataUrl);
         try {
-          const text = await extractTextFromImage(dataUrl);
+          const text = await extractTextFromImage(dataUrl, (status) => {
+            setScanStatusMessage(status);
+          });
           processDocumentText(text);
         } catch (err: any) {
           console.warn('Erro no OCR:', err);
-          setErrorMessage('O OCR não conseguiu ler todos os textos. Por favor, confirme os campos abaixo.');
+          setErrorMessage('O OCR não conseguiu ler todos os textos do printscreen. Por favor, confirme os campos abaixo.');
         } finally {
           setIsScanning(false);
         }
+      };
+      reader.onerror = () => {
+        setIsScanning(false);
+        setErrorMessage('Falha ao ler o arquivo de imagem.');
       };
       reader.readAsDataURL(file);
     }
@@ -219,7 +226,9 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
     setIsScanning(true);
     setScanStatusMessage('Lendo texto da foto capturada com OCR...');
     try {
-      const text = await extractTextFromImage(imageDataUrl);
+      const text = await extractTextFromImage(imageDataUrl, (status) => {
+        setScanStatusMessage(status);
+      });
       processDocumentText(text);
     } catch (err) {
       console.warn('Erro OCR na câmera:', err);
@@ -382,11 +391,11 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
             <div className="flex items-center justify-center gap-2 mb-1.5">
               <FileText className="w-4 h-4 text-slate-700" />
               <span className="text-sm font-bold text-slate-800">
-                Carregue o arquivo da Certidão (PDF ou Imagem)
+                Carregue o arquivo da Certidão (PDF ou Foto/Printscreen JPG, PNG)
               </span>
             </div>
             <p className="text-xs text-slate-500 mb-3 max-w-lg mx-auto">
-              O sistema lê automaticamente o número, nome, data de nascimento e data de expedição para calcular os 90 dias de validade legal.
+              O sistema analisa automaticamente arquivos PDF e capturas de tela/fotos de celular (JPG, JPEG, PNG, WEBP), extraindo o número, nome, data de nascimento e calculando a validade de 90 dias.
             </p>
 
             {isScanning ? (
@@ -443,10 +452,10 @@ export const DocumentFormModal: React.FC<DocumentFormModalProps> = ({
                 >
                   <label>
                     <Upload className="w-4 h-4" />
-                    Carregar Certidão (PDF / Imagem)
+                    Carregar Certidão (PDF / Imagem / Print)
                     <input
                       type="file"
-                      accept="application/pdf,image/*"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp,image/*"
                       onChange={handleFileUpload}
                       className="hidden"
                     />
