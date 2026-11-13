@@ -39,22 +39,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-2xl mx-auto mb-3 shadow-xs">
           <ShieldCheck className="w-6 h-6" />
         </div>
-        <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">Acesso ao Cofre</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">Realizar Autenticação</CardTitle>
         <CardDescription className="text-xs sm:text-sm mt-1">
-          Entre para gerenciar seus documentos com proteção criptográfica LGPD.
+          Entre com seu e-mail e senha para acessar o sistema seguro com proteção LGPD.
         </CardDescription>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setEmail('luan@secid.pr.gov.br');
-            setSenha('segredo123');
-          }}
-          className="mt-3 mx-auto text-xs font-semibold h-8"
-        >
-          🔑 Preencher Credenciais de Teste
-        </Button>
       </CardHeader>
 
       {errorMessage && (

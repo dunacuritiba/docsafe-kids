@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface NavbarProps {
-  currentTab: 'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'PROFILE';
-  onTabChange: (tab: 'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'PROFILE') => void;
+  currentTab: 'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'USERS' | 'PROFILE';
+  onTabChange: (tab: 'DOCUMENTS' | 'LGPD' | 'DIACONO' | 'USERS' | 'PROFILE') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
@@ -50,20 +50,37 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             {/* Abas de Navegação (Desktop: md e acima) */}
             <nav className="hidden md:flex items-center gap-1 p-1 bg-muted/60 rounded-xl border border-border/40">
               {isDiacono && (
-                <Button
-                  variant={currentTab === 'DIACONO' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => onTabChange('DIACONO')}
-                  className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
-                    currentTab === 'DIACONO'
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-xs'
-                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 font-bold'
-                  }`}
-                  title="Supervisão geral de todos os documentos"
-                >
-                  <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0" />
-                  Painel do Diácono
-                </Button>
+                <>
+                  <Button
+                    variant={currentTab === 'DIACONO' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onTabChange('DIACONO')}
+                    className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
+                      currentTab === 'DIACONO'
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-xs'
+                        : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 font-bold'
+                    }`}
+                    title="Supervisão geral das certidões e relatórios"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0" />
+                    Painel do Diácono
+                  </Button>
+
+                  <Button
+                    variant={currentTab === 'USERS' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onTabChange('USERS')}
+                    className={`text-xs font-semibold gap-1.5 h-8 px-3 ${
+                      currentTab === 'USERS'
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                        : 'text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 font-bold'
+                    }`}
+                    title="Gestão de Usuários: editar dados e alterar fotos de perfil de membros"
+                  >
+                    <Users className="w-3.5 h-3.5 flex-shrink-0" />
+                    Gestão de Usuários
+                  </Button>
+                </>
               )}
 
               <Button
@@ -207,20 +224,37 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
         </button>
 
         {isDiacono && (
-          <button
-            type="button"
-            onClick={() => onTabChange('DIACONO')}
-            className={`flex flex-col items-center justify-center py-1.5 px-2.5 rounded-xl transition-all ${
-              currentTab === 'DIACONO'
-                ? 'text-purple-600 font-bold'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <div className={`p-1 rounded-lg ${currentTab === 'DIACONO' ? 'bg-purple-100 dark:bg-purple-950/40' : ''}`}>
-              <ShieldAlert className="w-5 h-5 text-purple-600" />
-            </div>
-            <span className="text-[11px] mt-0.5 font-medium">Diácono</span>
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => onTabChange('DIACONO')}
+              className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
+                currentTab === 'DIACONO'
+                  ? 'text-purple-600 font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <div className={`p-1 rounded-lg ${currentTab === 'DIACONO' ? 'bg-purple-100 dark:bg-purple-950/40' : ''}`}>
+                <ShieldAlert className="w-5 h-5 text-purple-600" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-medium">Diácono</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onTabChange('USERS')}
+              className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
+                currentTab === 'USERS'
+                  ? 'text-emerald-600 font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <div className={`p-1 rounded-lg ${currentTab === 'USERS' ? 'bg-emerald-100 dark:bg-emerald-950/40' : ''}`}>
+                <Users className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-medium">Membros</span>
+            </button>
+          </>
         )}
 
         <button
