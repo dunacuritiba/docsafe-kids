@@ -14,6 +14,7 @@ import {
   EyeOff,
   Trash2,
   Calendar,
+  CheckCircle2,
 } from 'lucide-react';
 import { REDES_DISPONIVEIS, isUserAdmin, type RedeType, type UserRole } from '../../types';
 import { maskPhone, maskCPF, validateCPF } from '../../utils/masks';
@@ -51,6 +52,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
   const [isLgpdModalOpen, setIsLgpdModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Limite máximo de data para ter pelo menos 18 anos completos na data de hoje
+  const maxBirthDate = (() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 18);
+    return d.toISOString().split('T')[0];
+  })();
+
   // Preenchimento de exemplo rápido para testes com os dados da certidão real da PF
   const fillSampleData = () => {
     setNome('LUAN ALVES DA SILVA');
@@ -61,6 +69,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
     setRede('ARAUCÁRIA');
     setSenha('segredo123');
     setConfirmarSenha('segredo123');
+    setFotoUrl('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%232563eb" width="100" height="100"/><circle cx="50" cy="40" r="20" fill="%23ffffff"/><path d="M20,85 C20,65 35,60 50,60 C65,60 80,65 80,85 Z" fill="%23ffffff"/></svg>');
     setLgpdConsent(true);
     setErrorMessage(null);
   };
@@ -95,26 +104,80 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!nome.trim() || !email.trim() || !dataNascimento || !telefone.trim() || !cpf.trim() || !senha) {
-      setErrorMessage('Por favor, preencha todos os campos obrigatórios, incluindo data de nascimento.');
+    // 1. Foto de perfil obrigatória
+    if (!fotoUrl || !fotoUrl.trim()) {
+      setErrorMessage('É obrigatório anexar uma foto de perfil (tire uma foto com a câmera ou envie um arquivo).');
+      return;
+    }
+
+    // 2. Nome completo e e-mail
+    if (!nome.trim()) {
+      setErrorMessage('Por favor, informe seu Nome Completo.');
+      return;
+    }
+
+    if (!email.trim()) {
+      setErrorMessage('Por favor, informe seu E-mail.');
+      return;
+    }
+
+    // 3. Data de Nascimento Obrigatória e Maior de 18 anos
+    if (!dataNascimento) {
+      setErrorMessage('A Data de Nascimento é obrigatória.');
+      return;
+    }
+
+    const [ano, mes, dia] = dataNascimento.split('-').map(Number);
+    const today = new Date();
+    let calculatedAge = today.getFullYear() - ano;
+    const m = (today.getMonth() + 1) - mes;
+    if (m < 0 || (m === 0 && today.getDate() < dia)) {
+      calculatedAge--;
+    }
+
+    if (calculatedAge < 18) {
+      setErrorMessage(
+        `Cadastro permitido exclusivamente para maiores de 18 anos. Idade atual calculada: ${calculatedAge} anos.`
+      );
+      return;
+    }
+
+    if (calculatedAge > 120 || ano < 1900) {
+      setErrorMessage('Por favor, informe uma data de nascimento válida.');
+      return;
+    }
+
+    // 4. Celular para contato obrigatório
+    const rawPhone = telefone.replace(/\D/g, '');
+    if (!telefone.trim() || rawPhone.length < 10) {
+      setErrorMessage('O número de celular para contato é obrigatório (mínimo de 10 a 11 dígitos com DDD).');
+      return;
+    }
+
+    // 5. CPF Obrigatório e matematicamente válido
+    const rawCpf = cpf.replace(/\D/g, '');
+    if (!cpf.trim() || rawCpf.length !== 11) {
+      setErrorMessage('O CPF é obrigatório e deve conter 11 dígitos.');
       return;
     }
 
     if (!validateCPF(cpf)) {
-      setErrorMessage('O CPF informado é matematicamente inválido.');
+      setErrorMessage('O CPF informado é matematicamente inválido. Verifique os números digitados.');
       return;
     }
 
+    // 6. Senhas
     if (senha.length < 6) {
       setErrorMessage('A senha deve ter no mínimo 6 caracteres.');
       return;
     }
 
     if (senha !== confirmarSenha) {
-      setErrorMessage('As senhas não coincidem.');
+      setErrorMessage('As senhas digitadas não coincidem.');
       return;
     }
 
+    // 7. Termos da LGPD
     if (!lgpdConsent) {
       setErrorMessage('É necessário consentir com os termos da LGPD para continuar.');
       return;
@@ -173,9 +236,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
 
       <CardContent className="p-0">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Seção Foto de Perfil / Documento */}
-          <div className="p-4 bg-muted/40 rounded-2xl border border-dashed border-border flex flex-col sm:flex-row items-center gap-4">
-            <div className="relative group">
+          {/* Seção Foto de Perfil / Documento (Obrigatória) */}
+          <div
+            className={`p-4 rounded-2xl border-2 transition-all flex flex-col sm:flex-row items-center gap-4 ${
+              fotoUrl
+                ? 'bg-muted/40 border-emerald-500/50'
+                : 'bg-muted/30 border-dashed border-border'
+            }`}
+          >
+            <div className="relative group shrink-0">
               <div className="w-20 h-20 rounded-2xl bg-muted border-2 border-background shadow-md overflow-hidden flex items-center justify-center">
                 {fotoUrl ? (
                   <img src={fotoUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
@@ -198,20 +267,33 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             </div>
 
             <div className="flex-1 text-center sm:text-left">
-              <p className="text-sm font-semibold text-foreground">Foto de Identificação</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                <p className="text-sm font-bold text-foreground">
+                  Foto de Identificação e Perfil <span className="text-destructive">*</span>
+                </p>
+                {fotoUrl ? (
+                  <Badge className="bg-emerald-600 text-white font-bold text-[10px] gap-1 py-0.5">
+                    <CheckCircle2 className="w-3 h-3" /> Foto Inserida
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="font-bold text-[10px] py-0.5">
+                    Obrigatório *
+                  </Badge>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Tire direto da câmera ou envie um arquivo de foto do seu aparelho.
+                É obrigatório anexar uma foto de perfil (foto de rosto nítida) para cadastro de membros e certidões.
               </p>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant={fotoUrl ? 'outline' : 'default'}
                   size="sm"
                   onClick={() => setIsCameraOpen(true)}
                   className="text-xs gap-1.5 h-9"
                 >
-                  <Camera className="w-4 h-4 text-muted-foreground" />
-                  Abrir Câmera
+                  <Camera className="w-4 h-4" />
+                  Tirar Foto com a Câmera
                 </Button>
 
                 <Button
@@ -273,23 +355,32 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               </div>
             </div>
 
-            {/* Data de Nascimento */}
+            {/* Data de Nascimento (Maior de 18 anos) */}
             <div className="space-y-1.5">
-              <Label className="text-xs sm:text-sm font-semibold">
-                Data de Nascimento <span className="text-destructive">*</span>
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs sm:text-sm font-semibold">
+                  Data de Nascimento <span className="text-destructive">*</span>
+                </Label>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-bold text-amber-700 dark:text-amber-300 border-amber-300 bg-amber-50 dark:bg-amber-950/40"
+                >
+                  +18 anos obrigatório
+                </Badge>
+              </div>
               <div className="relative">
                 <Calendar className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <Input
                   type="date"
                   required
+                  max={maxBirthDate}
                   value={dataNascimento}
                   onChange={e => setDataNascimento(e.target.value)}
                   className="pl-9 h-11 sm:h-10 text-base sm:text-sm font-sans"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Necessária para validação cruzada com a certidão.
+              <p className="text-[11px] text-muted-foreground">
+                Exigido 18 anos ou mais. Necessária para cruzamento com a certidão.
               </p>
             </div>
           </div>
@@ -298,9 +389,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Telefone com máscara brasileira */}
             <div className="space-y-1.5">
-              <Label className="text-xs sm:text-sm font-semibold">
-                Celular (BR) <span className="text-destructive">*</span>
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs sm:text-sm font-semibold">
+                  Celular para Contato (BR) <span className="text-destructive">*</span>
+                </Label>
+                <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground">
+                  Com DDD
+                </Badge>
+              </div>
               <div className="relative">
                 <Phone className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <Input
@@ -315,7 +411,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                Protegido por Criptografia (LGPD)
+                Obrigatório para contato ministerial (LGPD)
               </p>
             </div>
 
@@ -325,12 +421,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                 <Label className="text-xs sm:text-sm font-semibold">
                   CPF <span className="text-destructive">*</span>
                 </Label>
-                {isCpfValid !== null && (
+                {isCpfValid !== null ? (
                   <Badge
                     variant={isCpfValid ? 'default' : 'destructive'}
-                    className={`text-xs py-0 px-2 font-bold ${isCpfValid ? 'bg-emerald-600 text-white' : ''}`}
+                    className={`text-xs py-0 px-2 font-bold ${
+                      isCpfValid ? 'bg-emerald-600 text-white' : ''
+                    }`}
                   >
                     {isCpfValid ? 'CPF Válido' : 'CPF Inválido'}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground">
+                    Obrigatório
                   </Badge>
                 )}
               </div>
@@ -348,7 +450,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                Protegido por Criptografia (LGPD)
+                Obrigatório para conferência com a Certidão
               </p>
             </div>
           </div>
